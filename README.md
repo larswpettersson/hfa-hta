@@ -1,5 +1,7 @@
 # HTA Tool — Hierarchical Task Analysis + TTA
 
+**🔗 Live: [larswpettersson.github.io/hfa-hta/HTA.html](https://larswpettersson.github.io/hfa-hta/HTA.html)** · [offline-version](https://larswpettersson.github.io/hfa-hta/hta_offline.html) (single file)
+
 Tools for creating and visualizing Hierarchical Task Analysis (HTA) diagrams with Tabular Task Analysis (TTA / HEI fields).
 
 ## HTA + TTA Editor (`HTA.html`)
