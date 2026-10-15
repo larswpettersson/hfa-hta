@@ -1654,6 +1654,13 @@
     addTtaRow: () => addTtaRow(),
     toggleColumnPicker: () => toggleColumnPicker(),
     resetColumns: () => resetColumns(),
+    toggleHelp: () => {
+      const dlg = document.getElementById("help-dialog");
+      if (!dlg) return;
+      if (dlg.open) dlg.close();
+      else dlg.showModal();
+    },
+    closeHelp: () => document.getElementById("help-dialog")?.close(),
   };
 
   function runAction(name) {
@@ -1665,6 +1672,15 @@
 
   document.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", () => runAction(btn.dataset.action));
+  });
+
+  // Modal help: keep keys from reaching the editor's global shortcuts; Esc closes natively.
+  document.getElementById("help-dialog")?.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "?") {
+      e.preventDefault();
+      actions.closeHelp();
+    }
   });
 
   importFileInput?.addEventListener("change", async () => {

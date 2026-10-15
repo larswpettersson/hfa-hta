@@ -110,13 +110,29 @@
 
     .action-btn .ul { text-decoration: underline; }
 
-    .help-text {
-      font-size: 12px;
-      color: var(--color-foreground-muted);
-      background: var(--color-background-sunken);
-      padding: 8px 12px;
-      border-radius: 4px;
+    .help-dialog {
+      max-width: min(720px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      padding: 20px 24px;
+      color: var(--color-foreground);
+      background: var(--color-background-elevated);
+      border: 1px solid var(--color-foreground-subtle);
+      border-radius: 8px;
+      font-size: 13px;
     }
+    .help-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+    .help-dialog h2 { margin: 0 0 12px; font-size: 16px; }
+    .help-dialog h3 { margin: 14px 0 4px; font-size: 13px; }
+    .help-dialog dl {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 3px 16px;
+      margin: 0;
+    }
+    .help-dialog dt { font-weight: 600; white-space: nowrap; }
+    .help-dialog dd { margin: 0; color: var(--color-foreground-muted); }
+    .help-dialog .help-note { margin: 14px 0 0; color: var(--color-foreground-muted); }
+    .help-dialog .help-close { float: right; }
 
     .main-content {
       display: flex;
@@ -537,7 +553,9 @@
           + <span class="btn-label"><span class="ul">D</span>uplicate</span>
         </button>
         <input type="file" id="import-state-file" accept=".json,application/json" hidden />
-        <span class="help-text">Space+drag pan · ⌘Z undo · ⌘⇧Z redo · ↑ parent · ↓ next · C/S/D · Del</span>
+        <button type="button" class="action-btn" data-action="toggleHelp" data-shortcut="?" title="Show shortcuts and abbreviations (?)" aria-label="Show shortcuts and abbreviations" aria-haspopup="dialog">
+          ?
+        </button>
       </div>
     </div>
 
@@ -590,14 +608,42 @@
       </div>
     </div>
 
-    <p class="hint">
-      Keyboard: <kbd>Space</kbd>+drag pan · <kbd>⌘Z</kbd> undo · <kbd>⌘⇧Z</kbd> redo ·
-      <kbd>↑</kbd> parent · <kbd>↓</kbd> next ·
-      <kbd>←</kbd><kbd>→</kbd> siblings (selected: outdent/indent) ·
-      <kbd>C</kbd> child · <kbd>S</kbd> sibling · <kbd>D</kbd> duplicate ·
-      <kbd>Del</kbd> delete · <kbd>Enter</kbd> edit description · <kbd>Esc</kbd> clear selection
-      (letter shortcuts off while typing)
-    </p>
+    <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title">
+      <button type="button" class="action-btn help-close" data-action="closeHelp" title="Close (Esc)">Close</button>
+      <h2 id="help-title">Abbreviations and shortcuts</h2>
+
+      <h3>Abbreviations</h3>
+      <dl>
+        <dt>HTA</dt><dd>Hierarchical Task Analysis</dd>
+        <dt>TTA</dt><dd>Tabular Task Analysis</dd>
+      </dl>
+
+      <h3>Add and edit tasks</h3>
+      <dl>
+        <dt>C / S / D</dt><dd>Add child / sibling / duplicate</dd>
+        <dt>Enter</dt><dd>Start / apply description edit</dd>
+        <dt>Esc</dt><dd>Cancel edit, or clear selection / close column picker</dd>
+        <dt>Delete / Backspace</dt><dd>Delete selected task (not root)</dd>
+      </dl>
+
+      <h3>Navigate and restructure</h3>
+      <dl>
+        <dt>↑</dt><dd>Hover: move to parent. Selected: reorder among siblings</dd>
+        <dt>↓</dt><dd>Hover: next task in tree order. Selected: reorder among siblings</dd>
+        <dt>←</dt><dd>Hover: previous sibling. Selected: outdent</dd>
+        <dt>→</dt><dd>Hover: next sibling. Selected: indent under previous sibling</dd>
+        <dt>Space + drag</dt><dd>Pan the HTA canvas</dd>
+      </dl>
+
+      <h3>History and help</h3>
+      <dl>
+        <dt>⌘Z / Ctrl+Z</dt><dd>Undo</dd>
+        <dt>⌘⇧Z / Ctrl+Shift+Z / Ctrl+Y</dt><dd>Redo</dd>
+        <dt>?</dt><dd>Open / close this dialog</dd>
+      </dl>
+
+      <p class="help-note">Letter shortcuts are off while typing. Hover a task for keyboard focus without selecting; click to select.</p>
+    </dialog>
   </div>
 
   <div class="status-message" id="statusMessage"></div>
@@ -2259,6 +2305,13 @@
     addTtaRow: () => addTtaRow(),
     toggleColumnPicker: () => toggleColumnPicker(),
     resetColumns: () => resetColumns(),
+    toggleHelp: () => {
+      const dlg = document.getElementById("help-dialog");
+      if (!dlg) return;
+      if (dlg.open) dlg.close();
+      else dlg.showModal();
+    },
+    closeHelp: () => document.getElementById("help-dialog")?.close(),
   };
 
   function runAction(name) {
@@ -2270,6 +2323,15 @@
 
   document.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", () => runAction(btn.dataset.action));
+  });
+
+  // Modal help: keep keys from reaching the editor's global shortcuts; Esc closes natively.
+  document.getElementById("help-dialog")?.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "?") {
+      e.preventDefault();
+      actions.closeHelp();
+    }
   });
 
   importFileInput?.addEventListener("change", async () => {
