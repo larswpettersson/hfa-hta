@@ -2,11 +2,12 @@
 
 **🔗 Live: [larswpettersson.github.io/hfa-hta/HTA.html](https://larswpettersson.github.io/hfa-hta/HTA.html)**
 
+Tools for creating and visualizing Hierarchical Task Analysis (HTA) diagrams with Tabular Task Analysis (TTA / HEI fields).
+
 ## Offline use
 
 The editor also runs fully offline. [`hta_offline.html`](https://larswpettersson.github.io/hfa-hta/hta_offline.html) is a single self-contained HTML file (script inlined, no network needed). **[Download hta_offline.html](https://larswpettersson.github.io/hfa-hta/hta_offline.html)** (right-click → *Save link as…*), then open the saved file in any modern browser. Import/Export use local file pickers and downloads; preferences are kept in `localStorage`.
 
-Tools for creating and visualizing Hierarchical Task Analysis (HTA) diagrams with Tabular Task Analysis (TTA / HEI fields).
 
 ## HTA + TTA Editor (`HTA.html`)
 
