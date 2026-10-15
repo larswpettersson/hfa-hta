@@ -153,3 +153,7 @@ Root Task
 		Sub-subtask 1.2
 	Subtask 2
 ```
+
+## License
+
+[MIT](LICENSE) © 2026 Lars Pettersson
