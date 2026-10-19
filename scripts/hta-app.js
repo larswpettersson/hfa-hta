@@ -344,7 +344,7 @@
     }
     if (root) reassignIds(root);
     const columns = normalizeColumns(raw?.meta?.columns);
-    const ttaRecords = normalizeTtaRecords(raw?.ttaRecords);
+    const ttaRecords = normalizeTtaRecords(raw?.ttaRecords, columns);
     return {
       version: DIAGRAM_VERSION,
       meta: { theme, columns },
@@ -353,6 +353,22 @@
     };
   }
 
+  const BUILTIN_RECORD_KEYS = new Set([
+    "id",
+    "taskId",
+    "externalErrorMode",
+    "recovery",
+    "consequence",
+    "humanErrorType",
+    "psf",
+    "comments",
+  ]);
+
+  /**
+   * Columns come from meta.columns. Built-in ids (see DEFAULT_COLUMNS) may be
+   * relabelled; any other id is a custom text column stored as record[id].
+   * Optional per-column: type ("text" | "list" | "select"), options (string[]).
+   */
   function normalizeColumns(cols) {
     if (!Array.isArray(cols) || !cols.length) {
       try {
@@ -365,20 +381,43 @@
       }
       return DEFAULT_COLUMNS.map((c) => ({ ...c }));
     }
-    const byId = new Map(cols.map((c) => [c.id, c]));
-    return DEFAULT_COLUMNS.map((def, i) => {
-      const hit = byId.get(def.id);
-      return {
-        id: def.id,
-        label: def.label,
-        visible: hit?.visible !== false,
-        order: typeof hit?.order === "number" ? hit.order : i,
+    const defById = new Map(DEFAULT_COLUMNS.map((c) => [c.id, c]));
+    const seen = new Set();
+    const out = [];
+    cols.forEach((c, i) => {
+      if (!c || typeof c.id !== "string" || !c.id.trim() || seen.has(c.id)) return;
+      seen.add(c.id);
+      const def = defById.get(c.id);
+      const col = {
+        id: c.id,
+        label: String(c.label || def?.label || c.id),
+        visible: c.visible !== false,
+        order: typeof c.order === "number" ? c.order : def ? def.order : i,
       };
-    }).sort((a, b) => a.order - b.order);
+      if (c.type === "text" || c.type === "list" || c.type === "select") col.type = c.type;
+      if (Array.isArray(c.options) && c.options.length) {
+        col.options = c.options.map(String);
+        if (!col.type) col.type = "select";
+      }
+      out.push(col);
+    });
+    DEFAULT_COLUMNS.forEach((def) => {
+      if (!seen.has(def.id)) {
+        out.push({ ...def, order: out.length + def.order });
+      }
+    });
+    return out.sort((a, b) => a.order - b.order);
   }
 
-  function normalizeTtaRecords(list) {
+  function customColumnIds(columns) {
+    return (columns || [])
+      .map((c) => c.id)
+      .filter((id) => id !== "taskStep" && !BUILTIN_RECORD_KEYS.has(id));
+  }
+
+  function normalizeTtaRecords(list, columns) {
     if (!Array.isArray(list)) return [];
+    const extra = customColumnIds(columns);
     return list
       .filter((r) => r && typeof r === "object")
       .map((r, i) => ({
@@ -395,6 +434,7 @@
               .map((s) => s.trim())
               .filter(Boolean),
         comments: String(r.comments || ""),
+        ...Object.fromEntries(extra.map((k) => [k, String(r[k] ?? "")])),
       }));
   }
 
@@ -895,16 +935,19 @@
     }
   }
 
-  function emptyTtaRecord(taskId) {
+  function emptyTtaRecord(taskId, externalErrorMode = "") {
     return {
       id: newRecordId(),
       taskId,
-      externalErrorMode: "",
+      externalErrorMode,
       recovery: "",
       consequence: "",
       humanErrorType: "",
       psf: [],
       comments: "",
+      ...Object.fromEntries(
+        customColumnIds(state?.meta?.columns).map((k) => [k, ""])
+      ),
     };
   }
 
@@ -976,41 +1019,44 @@
         if (col.id === "taskStep") {
           td.className = "tta-task-ref";
           td.textContent = taskRefFor(rec.taskId);
-        } else if (col.id === "externalErrorMode") {
+        } else if (
+          col.type !== "text" &&
+          (col.id === "externalErrorMode" || col.options)
+        ) {
+          const key = col.id;
+          const choices = col.options || EXTERNAL_ERROR_MODES;
           const sel = document.createElement("select");
           const blank = document.createElement("option");
           blank.value = "";
           blank.textContent = "—";
-          if (!rec.externalErrorMode) blank.selected = true;
+          if (!rec[key]) blank.selected = true;
           sel.appendChild(blank);
-          EXTERNAL_ERROR_MODES.forEach((m) => {
+          choices.forEach((m) => {
             const opt = document.createElement("option");
             opt.value = m;
             opt.textContent = m;
-            if (m === rec.externalErrorMode) opt.selected = true;
+            if (m === rec[key]) opt.selected = true;
             sel.appendChild(opt);
           });
-          if (
-            rec.externalErrorMode &&
-            !EXTERNAL_ERROR_MODES.includes(rec.externalErrorMode)
-          ) {
+          if (rec[key] && !choices.includes(rec[key])) {
             const opt = document.createElement("option");
-            opt.value = rec.externalErrorMode;
+            opt.value = rec[key];
             opt.selected = true;
-            opt.textContent = rec.externalErrorMode;
+            opt.textContent = rec[key];
             sel.appendChild(opt);
           }
           sel.addEventListener("change", () => {
-            rec.externalErrorMode = sel.value;
+            rec[key] = sel.value;
             commit(() => {});
           });
           td.appendChild(sel);
-        } else if (col.id === "psf") {
+        } else if (col.id === "psf" || col.type === "list") {
+          const key = col.id;
           td.contentEditable = "true";
           td.spellcheck = false;
-          td.textContent = (rec.psf || []).join(", ");
+          td.textContent = [].concat(rec[key] || []).join(", ");
           td.addEventListener("blur", () => {
-            rec.psf = readEditableText(td)
+            rec[key] = readEditableText(td)
               .split(",")
               .map((s) => s.trim())
               .filter(Boolean);
@@ -1360,14 +1406,10 @@
         (s.ttaRecords || []).forEach((r) => {
           if (r.taskId === n._srcId) {
             copies.push({
+              ...r,
               id: newRecordId(),
               taskId: null,
-              externalErrorMode: r.externalErrorMode,
-              recovery: r.recovery,
-              consequence: r.consequence,
-              humanErrorType: r.humanErrorType,
               psf: [...(r.psf || [])],
-              comments: r.comments,
               _bind: n,
             });
           }
@@ -1421,16 +1463,7 @@
     }
     commit((s) => {
       if (!s.ttaRecords) s.ttaRecords = [];
-      s.ttaRecords.push({
-        id: newRecordId(),
-        taskId,
-        externalErrorMode: "Omission",
-        recovery: "",
-        consequence: "",
-        humanErrorType: "",
-        psf: [],
-        comments: "",
-      });
+      s.ttaRecords.push(emptyTtaRecord(taskId, "Omission"));
     });
     selectTask(taskId, { skipTextFocus: true });
   }
@@ -1574,18 +1607,11 @@
       if (oa !== ob) return oa - ob;
       return String(a.id).localeCompare(String(b.id));
     });
-    const headers = [
-      "Depth",
-      "ID",
-      "Title",
-      "Outline",
-      "External Error Mode",
-      "Recovery",
-      "Consequence",
-      "Human Error Type",
-      "PSFs",
-      "Comments",
-    ];
+    const dataCols = (s.meta?.columns || DEFAULT_COLUMNS)
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .filter((c) => c.id !== "taskStep");
+    const headers = ["Depth", "ID", "Title", "Outline", ...dataCols.map((c) => c.label)];
     const lines = [headers.map(csvEscape).join(",")];
     records.forEach((rec) => {
       const node = findTask(s.root, rec.taskId);
@@ -1603,12 +1629,10 @@
           id,
           title,
           outline,
-          rec.externalErrorMode || "",
-          rec.recovery || "",
-          rec.consequence || "",
-          rec.humanErrorType || "",
-          (rec.psf || []).join("; "),
-          rec.comments || "",
+          ...dataCols.map((c) => {
+            const v = rec[c.id];
+            return Array.isArray(v) ? v.join("; ") : v || "";
+          }),
         ]
           .map(csvEscape)
           .join(",")
