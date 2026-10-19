@@ -686,7 +686,7 @@
     return true;
   }
 
-  /** Selected: ↑↓ reorder among siblings (subtree moves with the task). */
+  /** Selected: ←→ reorder among siblings (subtree moves with the task). */
   function moveSelectedAmongSiblings(direction) {
     const selectedId = ui.selectedTaskId;
     if (!selectedId || !state?.root) return false;
@@ -708,7 +708,7 @@
   }
 
   /**
-   * Selected ← : outdent — become next sibling of current parent
+   * Selected ↑ : outdent — become next sibling of current parent
    * (subtree stays attached). No-op for root or top-level children.
    */
   function outdentSelected() {
@@ -738,7 +738,7 @@
   }
 
   /**
-   * Selected → : indent — become last child of previous sibling
+   * Selected ↓ : indent — become last child of previous sibling
    * (subtree stays attached).
    */
   function indentSelected() {
@@ -764,10 +764,10 @@
 
   function handleSelectedArrow(key) {
     if (!ui.selectedTaskId) return false;
-    if (key === "ArrowUp") return moveSelectedAmongSiblings(-1);
-    if (key === "ArrowDown") return moveSelectedAmongSiblings(1);
-    if (key === "ArrowLeft") return outdentSelected();
-    if (key === "ArrowRight") return indentSelected();
+    if (key === "ArrowLeft") return moveSelectedAmongSiblings(-1);
+    if (key === "ArrowRight") return moveSelectedAmongSiblings(1);
+    if (key === "ArrowUp") return outdentSelected();
+    if (key === "ArrowDown") return indentSelected();
     return false;
   }
 

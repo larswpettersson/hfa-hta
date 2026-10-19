@@ -628,10 +628,10 @@
 
       <h3>Navigate and restructure</h3>
       <dl>
-        <dt>↑</dt><dd>Hover: move to parent. Selected: reorder among siblings</dd>
-        <dt>↓</dt><dd>Hover: next task in tree order. Selected: reorder among siblings</dd>
-        <dt>←</dt><dd>Hover: previous sibling. Selected: outdent</dd>
-        <dt>→</dt><dd>Hover: next sibling. Selected: indent under previous sibling</dd>
+        <dt>↑</dt><dd>Hover: move to parent. Selected: outdent (up a level)</dd>
+        <dt>↓</dt><dd>Hover: next task in tree order. Selected: indent under previous sibling (down a level)</dd>
+        <dt>←</dt><dd>Hover: previous sibling. Selected: move earlier among siblings</dd>
+        <dt>→</dt><dd>Hover: next sibling. Selected: move later among siblings</dd>
         <dt>Space + drag</dt><dd>Pan the HTA canvas</dd>
       </dl>
 
@@ -1415,10 +1415,10 @@
 
   function handleSelectedArrow(key) {
     if (!ui.selectedTaskId) return false;
-    if (key === "ArrowUp") return moveSelectedAmongSiblings(-1);
-    if (key === "ArrowDown") return moveSelectedAmongSiblings(1);
-    if (key === "ArrowLeft") return outdentSelected();
-    if (key === "ArrowRight") return indentSelected();
+    if (key === "ArrowLeft") return moveSelectedAmongSiblings(-1);
+    if (key === "ArrowRight") return moveSelectedAmongSiblings(1);
+    if (key === "ArrowUp") return outdentSelected();
+    if (key === "ArrowDown") return indentSelected();
     return false;
   }
 
