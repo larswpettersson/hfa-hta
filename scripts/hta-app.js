@@ -1218,6 +1218,22 @@
     return true;
   }
 
+  /**
+   * Replace the tree and TTA records (used by the AI panel). Ids are renumbered from the tree
+   * position and ttaRecords.taskId follows; theme and columns stay. Recorded in undo history.
+   */
+  function replaceState(raw) {
+    const { errors } = validateImportState({ root: raw?.root });
+    if (errors.length) throw new Error(formatImportValidationMessage(errors, []));
+    commit((s) => {
+      s.root = cloneNode(raw.root);
+      s.ttaRecords = normalizeTtaRecords(raw.ttaRecords);
+      reassignIdsAndRemapTta(s);
+      if (ui.selectedTaskId && !findTask(s.root, ui.selectedTaskId)) ui.selectedTaskId = null;
+    });
+    applySelectionUI();
+  }
+
   // ---------- Selection (id ↔ line) ----------
 
   function selectTextLineForTask(taskId) {
@@ -2109,6 +2125,9 @@
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
+    replaceState,
+    getSelectedTaskId: () => ui.selectedTaskId,
+    externalErrorModes: EXTERNAL_ERROR_MODES.slice(),
     loadState,
     parseHierarchy,
     treeToIndentedText,

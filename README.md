@@ -9,6 +9,20 @@ Tools for creating and visualizing Hierarchical Task Analysis (HTA) diagrams wit
 The editor also runs fully offline. [`hta_offline.html`](https://larswpettersson.github.io/hfa-hta/hta_offline.html) is a single self-contained HTML file (script inlined, no network needed). **[Download hta_offline.html](https://larswpettersson.github.io/hfa-hta/hta_offline.html)** (right-click → *Save link as…*), then open the saved file in any modern browser. Import/Export use local file pickers and downloads; preferences are kept in `localStorage`.
 
 
+## AI analysis
+
+Press **AI** in the toolbar (or **A**) to open the analysis panel on the right. It works the same way as the AI analysis in the [STPA workbench](https://larswpettersson.github.io/hfa-stpa/workbench/):
+
+- **Providers:** Anthropic Claude, Google Gemini, or a local model (Ollama, LM Studio, LocalAI). Pick one under **Settings** and paste an API key (or check the local endpoint). The picker beside **Send** chooses the model for the next question.
+- **Context:** every question sends the task hierarchy and the TTA rows (ids, titles and filled-in HEI fields). Select a task to focus the question on it and its sub-tasks.
+- **Quick actions** for common questions; **Send earlier turns** for follow-ups; answers fold, and **Export .md** saves the conversation.
+- **Proposals:** when the model returns a JSON block with a patch (or a complete analysis), the answer shows **Apply**. **Revert** on the card restores what was there before.
+- **Keys** stay in this browser's `localStorage` (only when *Remember API keys* is ticked) and are sent only to the provider you pick. The provider settings are shared by the HFA tools on the same site, so a key saved in the STPA workbench is used here too. Use a restricted key.
+
+The panel is [`scripts/ai-assist.js`](scripts/ai-assist.js) (the same file in hfa-hta and hfa-bowtie) and the HTA adapter is [`scripts/hta-ai.js`](scripts/hta-ai.js): system prompt, quick actions, the data sent to the model and how a patch is applied. The offline file includes both; it needs network access only for the AI calls.
+
+A patch can rename, add, move and remove tasks and add or merge TTA rows by id; the editor then renumbers the tasks and the TTA rows follow. An applied patch is one step in the undo history (**Ctrl/⌘+Z**).
+
 ## HTA + TTA Editor (`HTA.html`)
 
 Primary editor. Open [`HTA.html`](HTA.html) in a modern browser — no build step. Logic lives in [`scripts/hta-app.js`](scripts/hta-app.js). Design reference: Penpot **HFA DS → TTA draft**.
@@ -67,6 +81,7 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 | **←** | Outdent selected task |
 | **→** | Indent selected task under previous sibling |
 | **C** / **S** / **D** | Child / Sibling / Duplicate |
+| **A** | Open / close the AI analysis panel |
 | **Delete** / **Backspace** | Delete selected task (not root) |
 | **Enter** | Start / apply description edit |
 | **Esc** | Cancel edit, or clear selection / close column picker |
