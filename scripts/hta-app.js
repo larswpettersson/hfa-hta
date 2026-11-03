@@ -943,9 +943,10 @@
     }
   }
 
-  function emptyTtaRecord(taskId) {
+  /** An empty row with the given analysis' columns (pass them: during import `state` is still the old analysis). */
+  function emptyTtaRecord(taskId, columns = state?.meta?.columns) {
     const rec = { id: newRecordId(), taskId };
-    (state?.meta?.columns || DEFAULT_COLUMNS).forEach((c) => {
+    (columns || DEFAULT_COLUMNS).forEach((c) => {
       if (c.id !== "taskStep") rec[c.id] = columnValue(c, "");
     });
     return rec;
@@ -961,7 +962,7 @@
     const have = new Set(s.ttaRecords.map((r) => r.taskId));
     tasks.forEach((t) => {
       if (!have.has(t.id)) {
-        s.ttaRecords.push(emptyTtaRecord(t.id));
+        s.ttaRecords.push(emptyTtaRecord(t.id, s.meta?.columns));
         have.add(t.id);
       }
     });
@@ -1455,7 +1456,8 @@
     if (errors.length) throw new Error(formatImportValidationMessage(errors, []));
     commit((s) => {
       s.root = cloneNode(raw.root);
-      s.ttaRecords = normalizeTtaRecords(raw.ttaRecords);
+      // The analysis' columns decide the shape of each row; fields of other columns are kept.
+      s.ttaRecords = normalizeTtaRecords(raw.ttaRecords, s.meta.columns);
       reassignIdsAndRemapTta(s);
       if (ui.selectedTaskId && !findTask(s.root, ui.selectedTaskId)) ui.selectedTaskId = null;
     });
@@ -1660,7 +1662,7 @@
     }
     commit((s) => {
       if (!s.ttaRecords) s.ttaRecords = [];
-      s.ttaRecords.push(emptyTtaRecord(taskId));
+      s.ttaRecords.push(emptyTtaRecord(taskId, s.meta?.columns));
     });
     selectTask(taskId, { skipTextFocus: true });
   }
@@ -2344,7 +2346,6 @@
     getState: () => serializeState(),
     replaceState,
     getSelectedTaskId: () => ui.selectedTaskId,
-    externalErrorModes: EXTERNAL_ERROR_MODES.slice(),
     loadState,
     parseHierarchy,
     treeToIndentedText,
