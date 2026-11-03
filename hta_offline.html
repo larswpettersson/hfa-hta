@@ -1337,7 +1337,7 @@
     return true;
   }
 
-  /** Selected: ↑↓ reorder among siblings (subtree moves with the task). */
+  /** Selected: ←→ reorder among siblings (subtree moves with the task). */
   function moveSelectedAmongSiblings(direction) {
     const selectedId = ui.selectedTaskId;
     if (!selectedId || !state?.root) return false;
@@ -1359,7 +1359,7 @@
   }
 
   /**
-   * Selected ← : outdent — become next sibling of current parent
+   * Selected ↑ : outdent — become next sibling of current parent
    * (subtree stays attached). No-op for root or top-level children.
    */
   function outdentSelected() {
@@ -1389,7 +1389,7 @@
   }
 
   /**
-   * Selected → : indent — become last child of previous sibling
+   * Selected ↓ : indent — become last child of previous sibling
    * (subtree stays attached).
    */
   function indentSelected() {
@@ -2814,6 +2814,7 @@
     deleteSelectedTask,
   };
 })();
+
 </script>
 </body>
 </html>
