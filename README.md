@@ -50,10 +50,19 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 
 | Control | What it does |
 | --- | --- |
-| Columns | Show/hide HEI columns (prefs stored in `localStorage`) |
+| Columns | Show/hide columns, **Edit** a column's name and description, **+ Column** to add a custom column, **Reset** built-in columns (custom ones stay) |
 | Filter | Reserved (not yet wired) |
 | Export CSV | Download `hta-tta.csv` for Excel / SmartArt |
 | Add row | Extra HEI row for the selected task |
+
+### TTA columns
+
+The columns belong to the analysis and are saved in `meta.columns` (see [design principles 1.7](https://github.com/larswpettersson/hfa-ds/blob/main/docs/design-principles.md) in hfa-ds).
+
+- **Click a column header** (or press Enter on a focused header) to edit its name and **description**. The description says what the column means and how to fill it in; it shows as the header's tooltip and will be used by the AI support.
+- **Columns → + Column** adds a custom column. Its id is made from the name (e.g. *Control and feedback* → `controlAndFeedback`), and each TTA row stores its value under that id. Custom columns can be deleted (with their values); built-in columns can only be hidden.
+- Built-in columns have a default description. A built-in column that is relabelled in the file (e.g. *External Error Mode* → *Unsafe Control Action (UCA)*) does not keep it.
+- Every change can be undone (Ctrl/⌘+Z) and is included in **Export**.
 
 ### Keyboard
 
@@ -99,7 +108,10 @@ Version **2** includes `ttaRecords` and column meta:
   "meta": {
     "theme": "light",
     "columns": [
-      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0 }
+      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0,
+        "description": "The HTA task this row analyses (id and title)." },
+      { "id": "controlAndFeedback", "label": "Control and feedback", "visible": true, "order": 7,
+        "type": "text", "description": "Control actions and feedback for the task." }
     ]
   },
   "root": {
@@ -119,7 +131,8 @@ Version **2** includes `ttaRecords` and column meta:
       "consequence": "",
       "humanErrorType": "",
       "psf": [],
-      "comments": ""
+      "comments": "",
+      "controlAndFeedback": ""
     }
   ]
 }

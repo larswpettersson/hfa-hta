@@ -120,6 +120,8 @@
       border-radius: 8px;
       font-size: 13px;
     }
+    /* The global margin reset removes the browser's centring of modal dialogs. */
+    .help-dialog { margin: auto; }
     .help-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
     .help-dialog h2 { margin: 0 0 12px; font-size: 16px; }
     .help-dialog h3 { margin: 14px 0 4px; font-size: 13px; }
@@ -489,6 +491,52 @@
       gap: 8px;
     }
 
+    .column-picker .col-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .column-picker .col-row label { flex: 1; min-width: 0; }
+
+    .column-picker .col-edit {
+      font: inherit;
+      font-size: 12px;
+      padding: 2px 6px;
+      color: var(--color-foreground-muted);
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .column-picker .col-edit:hover,
+    .column-picker .col-edit:focus-visible { border-color: var(--color-foreground-subtle); color: var(--color-foreground); }
+
+    .tta-table th.tta-col-head { cursor: pointer; }
+    .tta-table th.tta-col-head:hover { background: color-mix(in srgb, var(--color-foreground) 12%, var(--color-background-sunken)); }
+    .tta-table th.tta-col-head:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+
+    .column-dialog { width: min(480px, calc(100vw - 32px)); }
+    .column-dialog form { display: grid; gap: 6px; }
+    .column-dialog label { font-weight: 600; margin-top: 6px; }
+    .column-dialog .hint { display: block; font-weight: 400; color: var(--color-foreground-muted); }
+    .column-dialog input,
+    .column-dialog textarea {
+      font: inherit;
+      font-size: 14px;
+      padding: 6px 8px;
+      color: var(--color-foreground);
+      background: var(--color-background-base);
+      border: 1px solid var(--color-foreground-subtle);
+      border-radius: 6px;
+      width: 100%;
+    }
+    .column-dialog textarea { resize: vertical; }
+    .column-dialog-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .column-dialog-actions .spacer { flex: 1; }
+    .column-dialog [hidden] { display: none; }
+
     .status-message {
       position: fixed;
       bottom: 20px;
@@ -595,7 +643,8 @@
           <h3>Columns</h3>
           <div id="columnPickerList"></div>
           <div class="picker-actions">
-            <button type="button" class="action-btn" data-action="resetColumns">Reset</button>
+            <button type="button" class="action-btn" data-action="addColumn" title="Add a custom column">+ Column</button>
+            <button type="button" class="action-btn" data-action="resetColumns" title="Built-in columns get their default name, description and order back; custom columns stay">Reset</button>
           </div>
         </div>
 
@@ -607,6 +656,22 @@
         </div>
       </div>
     </div>
+
+    <dialog class="help-dialog column-dialog" id="column-dialog" aria-labelledby="column-dialog-title">
+      <form id="column-form" method="dialog">
+        <h2 id="column-dialog-title">Edit column</h2>
+        <label for="column-label">Name</label>
+        <input id="column-label" type="text" autocomplete="off" required>
+        <label for="column-description">Description <span class="hint">what the column means and how to fill it in; shown as the header's tooltip and used by the AI support</span></label>
+        <textarea id="column-description" rows="3"></textarea>
+        <div class="column-dialog-actions">
+          <button type="button" class="action-btn" id="column-delete" hidden>Delete column</button>
+          <span class="spacer"></span>
+          <button type="submit" class="action-btn" value="cancel" formnovalidate>Cancel</button>
+          <button type="submit" class="action-btn" value="save">Save</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title">
       <button type="button" class="action-btn help-close" data-action="closeHelp" title="Close (Esc)">Close</button>
@@ -624,6 +689,12 @@
         <dt>Enter</dt><dd>Start / apply description edit</dd>
         <dt>Esc</dt><dd>Cancel edit, or clear selection / close column picker</dd>
         <dt>Delete / Backspace</dt><dd>Delete selected task (not root)</dd>
+      </dl>
+
+      <h3>TTA columns</h3>
+      <dl>
+        <dt>Click a header</dt><dd>Edit the column's name and description (or Enter on a focused header)</dd>
+        <dt>Columns → + Column</dt><dd>Add a custom column; custom columns can be deleted, built-in ones hidden</dd>
       </dl>
 
       <h3>Navigate and restructure</h3>

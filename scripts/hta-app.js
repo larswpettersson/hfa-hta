@@ -10,14 +10,23 @@
   const SPLIT_MIN_PCT = 20;
   const SPLIT_MAX_PCT = 75;
 
+  /* Each column has a short description: it shows as the header's tooltip and tells the AI support what the
+     column means. A relabelled built-in column does not keep the default description (see normalizeColumns). */
   const DEFAULT_COLUMNS = [
-    { id: "taskStep", label: "Task Step", visible: true, order: 0 },
-    { id: "externalErrorMode", label: "External Error Mode", visible: true, order: 1 },
-    { id: "recovery", label: "Recovery", visible: true, order: 2 },
-    { id: "consequence", label: "Consequence", visible: true, order: 3 },
-    { id: "humanErrorType", label: "Human Error Type", visible: true, order: 4 },
-    { id: "psf", label: "PSFs", visible: true, order: 5 },
-    { id: "comments", label: "Comments", visible: true, order: 6 },
+    { id: "taskStep", label: "Task Step", visible: true, order: 0,
+      description: "The HTA task this row analyses (id and title)." },
+    { id: "externalErrorMode", label: "External Error Mode", visible: true, order: 1,
+      description: "How the task can go wrong, e.g. omission, action too early or too late, wrong action." },
+    { id: "recovery", label: "Recovery", visible: true, order: 2,
+      description: "How the error can be noticed and corrected before it has an effect, and at which step." },
+    { id: "consequence", label: "Consequence", visible: true, order: 3,
+      description: "What happens if the error is not recovered." },
+    { id: "humanErrorType", label: "Human Error Type", visible: true, order: 4,
+      description: "The kind of error: slip, lapse, rule- or knowledge-based mistake, or violation." },
+    { id: "psf", label: "PSFs", visible: true, order: 5,
+      description: "Performance shaping factors that make the error more likely, e.g. time pressure, interface, training. Separate with commas." },
+    { id: "comments", label: "Comments", visible: true, order: 6,
+      description: "Notes, open questions and proposed measures." },
   ];
 
   const EXTERNAL_ERROR_MODES = [
@@ -367,7 +376,8 @@
   /**
    * Columns come from meta.columns. Built-in ids (see DEFAULT_COLUMNS) may be
    * relabelled; any other id is a custom text column stored as record[id].
-   * Optional per-column: type ("text" | "list" | "select"), options (string[]).
+   * Optional per-column: type ("text" | "list" | "select"), options (string[]),
+   * description (string). A built-in column keeps its default description only while its label is the default.
    */
   function normalizeColumns(cols) {
     if (!Array.isArray(cols) || !cols.length) {
@@ -388,9 +398,14 @@
       if (!c || typeof c.id !== "string" || !c.id.trim() || seen.has(c.id)) return;
       seen.add(c.id);
       const def = defById.get(c.id);
+      const label = String(c.label || def?.label || c.id);
       const col = {
         id: c.id,
-        label: String(c.label || def?.label || c.id),
+        label,
+        description:
+          typeof c.description === "string"
+            ? c.description.trim()
+            : def && label === def.label ? def.description : "",
         visible: c.visible !== false,
         order: typeof c.order === "number" ? c.order : def ? def.order : i,
       };
@@ -995,7 +1010,17 @@
     cols.forEach((col) => {
       const th = document.createElement("th");
       th.dataset.col = col.id;
+      th.className = "tta-col-head";
       th.textContent = col.label;
+      th.title = `${col.description ? col.description + "\n\n" : ""}Click to edit the column`;
+      th.tabIndex = 0;
+      th.addEventListener("click", () => openColumnEditor(col.id));
+      th.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        e.stopPropagation();
+        openColumnEditor(col.id);
+      });
       trh.appendChild(th);
     });
     ttaThead.appendChild(trh);
@@ -1099,9 +1124,121 @@
         });
         label.appendChild(cb);
         label.appendChild(document.createTextNode(col.label));
-        columnPickerList.appendChild(label);
+        if (col.description) label.title = col.description;
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "col-edit";
+        edit.textContent = "Edit";
+        edit.title = `Edit name and description of "${col.label}"`;
+        edit.addEventListener("click", () => openColumnEditor(col.id));
+        const row = document.createElement("div");
+        row.className = "col-row";
+        row.append(label, edit);
+        columnPickerList.appendChild(row);
       });
   }
+
+  // ---------- Column editor (name, description, custom columns) ----------
+
+  const columnDialog = document.getElementById("column-dialog");
+  const columnForm = document.getElementById("column-form");
+  const columnLabelInput = document.getElementById("column-label");
+  const columnDescInput = document.getElementById("column-description");
+  const columnDeleteBtn = document.getElementById("column-delete");
+  const columnDialogTitle = document.getElementById("column-dialog-title");
+  let editingColumnId = null; // null while adding a new column
+
+  const isBuiltinColumn = (id) => DEFAULT_COLUMNS.some((c) => c.id === id);
+
+  /** Column id made from the label: camelCase ASCII, unique, never a built-in or reserved record key. */
+  function makeColumnId(label, columns) {
+    const words = String(label)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Za-z0-9]+/g, " ")
+      .trim()
+      .split(" ")
+      .filter(Boolean);
+    let base = words
+      .map((w, i) => (i ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()))
+      .join("");
+    if (!base || /^[0-9]/.test(base)) base = `col${base}`;
+    const taken = new Set([...(columns || []).map((c) => c.id), ...BUILTIN_RECORD_KEYS, "taskStep"]);
+    let id = base;
+    for (let n = 2; taken.has(id); n++) id = `${base}${n}`;
+    return id;
+  }
+
+  function openColumnEditor(id) {
+    if (!columnDialog || !state?.meta?.columns) return;
+    const col = id ? state.meta.columns.find((c) => c.id === id) : null;
+    if (id && !col) return;
+    editingColumnId = col ? col.id : null;
+    columnDialogTitle.textContent = col ? "Edit column" : "New column";
+    columnLabelInput.value = col ? col.label : "";
+    columnDescInput.value = col ? col.description || "" : "";
+    columnDeleteBtn.hidden = !col || isBuiltinColumn(col.id);
+    columnPicker?.classList.remove("open");
+    columnDialog.showModal();
+    columnLabelInput.focus();
+    columnLabelInput.select();
+  }
+
+  function saveColumnEditor() {
+    const label = columnLabelInput.value.trim();
+    const description = columnDescInput.value.trim();
+    if (!label) {
+      showStatus("A column needs a name", "error");
+      columnLabelInput.focus();
+      return false;
+    }
+    const id = editingColumnId;
+    commit((s) => {
+      if (id) {
+        const col = s.meta.columns.find((c) => c.id === id);
+        if (!col) return;
+        col.label = label;
+        col.description = description;
+        return;
+      }
+      const newId = makeColumnId(label, s.meta.columns);
+      const order = Math.max(-1, ...s.meta.columns.map((c) => c.order)) + 1;
+      s.meta.columns.push({ id: newId, label, description, visible: true, order, type: "text" });
+      (s.ttaRecords || []).forEach((r) => {
+        if (r[newId] === undefined) r[newId] = "";
+      });
+    });
+    persistColumns();
+    showStatus(id ? `Column "${label}" updated` : `Column "${label}" added`, "success");
+    return true;
+  }
+
+  function deleteEditedColumn() {
+    const id = editingColumnId;
+    const col = id && state.meta.columns.find((c) => c.id === id);
+    if (!col || isBuiltinColumn(id)) return;
+    const filled = (state.ttaRecords || []).filter((r) => String(r[id] ?? "").trim()).length;
+    const note = filled ? ` Its values in ${filled} row${filled === 1 ? "" : "s"} are removed too.` : "";
+    if (!window.confirm(`Delete the column "${col.label}"?${note} (Ctrl/⌘+Z undoes it.)`)) return;
+    columnDialog.close();
+    commit((s) => {
+      s.meta.columns = s.meta.columns.filter((c) => c.id !== id);
+      (s.ttaRecords || []).forEach((r) => {
+        delete r[id];
+      });
+    });
+    persistColumns();
+    showStatus(`Column "${col.label}" deleted`, "success");
+  }
+
+  columnForm?.addEventListener("submit", (e) => {
+    if (e.submitter?.value === "cancel") return; // closes the dialog without saving
+    e.preventDefault();
+    if (saveColumnEditor()) columnDialog.close();
+  });
+  columnDeleteBtn?.addEventListener("click", deleteEditedColumn);
+  // Keep keys typed in the dialog from reaching the editor's global shortcuts; Esc closes natively.
+  columnDialog?.addEventListener("keydown", (e) => e.stopPropagation());
 
   function highlightTtaForTask(taskId) {
     if (!ttaTbody) return;
@@ -1487,11 +1624,17 @@
     columnPicker?.classList.toggle("open");
   }
 
+  /** Built-in columns get their default name, description, order and visibility back; custom columns stay. */
   function resetColumns() {
     if (!state) return;
-    state.meta.columns = DEFAULT_COLUMNS.map((c) => ({ ...c }));
+    commit((s) => {
+      const custom = (s.meta.columns || []).filter((c) => !isBuiltinColumn(c.id));
+      s.meta.columns = [
+        ...DEFAULT_COLUMNS.map((c) => ({ ...c })),
+        ...custom.map((c, i) => ({ ...c, visible: true, order: DEFAULT_COLUMNS.length + i })),
+      ];
+    });
     persistColumns();
-    renderTta();
     showStatus("Columns reset", "success");
   }
 
@@ -1693,6 +1836,7 @@
     addTtaRow: () => addTtaRow(),
     toggleColumnPicker: () => toggleColumnPicker(),
     resetColumns: () => resetColumns(),
+    addColumn: () => openColumnEditor(null),
     toggleHelp: () => {
       const dlg = document.getElementById("help-dialog");
       if (!dlg) return;
