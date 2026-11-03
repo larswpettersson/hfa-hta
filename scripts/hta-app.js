@@ -943,9 +943,10 @@
     }
   }
 
-  function emptyTtaRecord(taskId) {
+  /** An empty row with the given analysis' columns (pass them: during import `state` is still the old analysis). */
+  function emptyTtaRecord(taskId, columns = state?.meta?.columns) {
     const rec = { id: newRecordId(), taskId };
-    (state?.meta?.columns || DEFAULT_COLUMNS).forEach((c) => {
+    (columns || DEFAULT_COLUMNS).forEach((c) => {
       if (c.id !== "taskStep") rec[c.id] = columnValue(c, "");
     });
     return rec;
@@ -961,7 +962,7 @@
     const have = new Set(s.ttaRecords.map((r) => r.taskId));
     tasks.forEach((t) => {
       if (!have.has(t.id)) {
-        s.ttaRecords.push(emptyTtaRecord(t.id));
+        s.ttaRecords.push(emptyTtaRecord(t.id, s.meta?.columns));
         have.add(t.id);
       }
     });
@@ -1446,6 +1447,23 @@
     return true;
   }
 
+  /**
+   * Replace the tree and TTA records (used by the AI panel). Ids are renumbered from the tree
+   * position and ttaRecords.taskId follows; theme and columns stay. Recorded in undo history.
+   */
+  function replaceState(raw) {
+    const { errors } = validateImportState({ root: raw?.root });
+    if (errors.length) throw new Error(formatImportValidationMessage(errors, []));
+    commit((s) => {
+      s.root = cloneNode(raw.root);
+      // The analysis' columns decide the shape of each row; fields of other columns are kept.
+      s.ttaRecords = normalizeTtaRecords(raw.ttaRecords, s.meta.columns);
+      reassignIdsAndRemapTta(s);
+      if (ui.selectedTaskId && !findTask(s.root, ui.selectedTaskId)) ui.selectedTaskId = null;
+    });
+    applySelectionUI();
+  }
+
   // ---------- Selection (id ↔ line) ----------
 
   function selectTextLineForTask(taskId) {
@@ -1644,7 +1662,7 @@
     }
     commit((s) => {
       if (!s.ttaRecords) s.ttaRecords = [];
-      s.ttaRecords.push(emptyTtaRecord(taskId));
+      s.ttaRecords.push(emptyTtaRecord(taskId, s.meta?.columns));
     });
     selectTask(taskId, { skipTextFocus: true });
   }
@@ -2326,6 +2344,8 @@
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
+    replaceState,
+    getSelectedTaskId: () => ui.selectedTaskId,
     loadState,
     parseHierarchy,
     treeToIndentedText,
