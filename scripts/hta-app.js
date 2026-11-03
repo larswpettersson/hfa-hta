@@ -1110,7 +1110,7 @@
         const edit = document.createElement("button");
         edit.type = "button";
         edit.className = "col-edit";
-        edit.textContent = "Edit";
+        edit.textContent = "Edit…";
         edit.title = `Edit name and description of "${col.label}"`;
         edit.addEventListener("click", () => openColumnEditor(col.id));
         const row = document.createElement("div");
