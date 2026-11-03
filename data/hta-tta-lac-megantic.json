@@ -1,0 +1,300 @@
+{
+  "version": 2,
+  "meta": {
+    "theme": "light",
+    "columns": [
+      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0 },
+      { "id": "externalErrorMode", "label": "External Error Mode", "visible": true, "order": 1 },
+      { "id": "recovery", "label": "Recovery", "visible": true, "order": 2 },
+      { "id": "consequence", "label": "Consequence", "visible": true, "order": 3 },
+      { "id": "humanErrorType", "label": "Human Error Type", "visible": true, "order": 4 },
+      { "id": "psf", "label": "PSFs", "visible": true, "order": 5 },
+      { "id": "comments", "label": "Comments", "visible": true, "order": 6 }
+    ]
+  },
+  "root": {
+    "id": "1",
+    "title": "Operate, secure and keep safe MMA 2 (73-car Bakken crude train) at Nantes, 5-6 July 2013",
+    "level": 0,
+    "children": [
+      {
+        "id": "1.1",
+        "title": "Provide fit equipment and a safe operating framework (organisational, before the event)",
+        "level": 1,
+        "children": [
+          { "id": "1.1.1", "title": "Repair and maintain locomotive 5017", "level": 2, "children": [] },
+          { "id": "1.1.2", "title": "Define securement rules and special instructions for parked trains", "level": 2, "children": [] },
+          { "id": "1.1.3", "title": "Approve single-person train operation (SPTO)", "level": 2, "children": [] },
+          { "id": "1.1.4", "title": "Oversee compliance with securement rules (CROR s.112) and safety culture", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.2",
+        "title": "Operate MMA 2 from Farnham to Nantes (engineer alone)",
+        "level": 1,
+        "children": [
+          { "id": "1.2.1", "title": "Assess condition of lead locomotive 5017 and decide to continue", "level": 2, "children": [] },
+          { "id": "1.2.2", "title": "Drive train to crew-change point at Nantes", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.3",
+        "title": "Park train at Nantes",
+        "level": 1,
+        "children": [
+          { "id": "1.3.1", "title": "Select parking location (main line vs. siding with derail)", "level": 2, "children": [] },
+          { "id": "1.3.2", "title": "Stop train on 1.2% grade and apply automatic/independent air brakes", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.4",
+        "title": "Secure train against movement",
+        "level": 1,
+        "children": [
+          { "id": "1.4.1", "title": "Determine number of hand brakes required", "level": 2, "children": [] },
+          { "id": "1.4.2", "title": "Apply hand brakes", "level": 2, "children": [] },
+          { "id": "1.4.3", "title": "Test hand-brake effectiveness (air brakes released, train must hold)", "level": 2, "children": [] },
+          { "id": "1.4.4", "title": "Shut down locomotives and secure cab", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.5",
+        "title": "Report status and hand over",
+        "level": 1,
+        "children": [
+          { "id": "1.5.1", "title": "Report train secure to rail traffic controller (RTC) Farnham", "level": 2, "children": [] },
+          { "id": "1.5.2", "title": "Report locomotive 5017 defects (smoke, surges) to RTC Bangor", "level": 2, "children": [] },
+          { "id": "1.5.3", "title": "RTC assesses report and decides on action for defective locomotive", "level": 2, "children": [] },
+          { "id": "1.5.4", "title": "Leave site for hotel and escalate safety concern", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.6",
+        "title": "Respond to locomotive fire (about 23:50-00:13)",
+        "level": 1,
+        "children": [
+          { "id": "1.6.1", "title": "Report fire (911) and dispatch Nantes fire department and police", "level": 2, "children": [] },
+          { "id": "1.6.2", "title": "Shut down engine of 5017 and extinguish fire", "level": 2, "children": [] },
+          { "id": "1.6.3", "title": "Notify MMA RTC and decide on railway follow-up", "level": 2, "children": [] },
+          { "id": "1.6.4", "title": "Verify that train is safe before emergency services leave", "level": 2, "children": [] }
+        ]
+      },
+      {
+        "id": "1.7",
+        "title": "Keep unattended train in a safe state (00:13-01:14)",
+        "level": 1,
+        "children": [
+          { "id": "1.7.1", "title": "Maintain brake force while air pressure leaks away", "level": 2, "children": [] },
+          { "id": "1.7.2", "title": "Detect movement of unattended train", "level": 2, "children": [] },
+          { "id": "1.7.3", "title": "Stop or warn about runaway train before the town", "level": 2, "children": [] }
+        ]
+      }
+    ]
+  },
+  "ttaRecords": [
+    {
+      "id": "r1", "taskId": "1",
+      "externalErrorMode": "", "recovery": "", "consequence": "", "humanErrorType": "", "psf": [],
+      "comments": "Scenario: unattended MMA 2 rolled 11 km from Nantes and derailed in Lac-Mégantic at about 01:14 on 6 July 2013; 47 killed. TSB final report (Aug 2014) identified 18 causes and contributing factors. Data compiled from the Wikipedia article on the disaster; human error classification is the analyst's interpretation, not a TSB finding."
+    },
+    {
+      "id": "r2", "taskId": "1.1.1",
+      "externalErrorMode": "Non-standard repair (epoxy-like material) used instead of proper engine repair",
+      "recovery": "Post-repair inspection; locomotive inspection regime; crews reporting defects",
+      "consequence": "Repair fails in service: engine surges, black/white smoke, oil collects in turbocharger and ignites on the night of the accident",
+      "humanErrorType": "Violation (situational)",
+      "psf": ["Cost and time pressure to return locomotive to service", "Deferred maintenance", "Safety culture", "Supervision"],
+      "comments": "Repaired October 2012 after engine failure. TSB found years of deferred maintenance on 5017 and on five other inspected locomotives."
+    },
+    {
+      "id": "r3", "taskId": "1.1.2",
+      "externalErrorMode": "Special instructions require too few hand brakes and give no grade-dependent guidance",
+      "recovery": "Regulator validation of special instructions (none performed); company risk assessment",
+      "consequence": "Crew following procedure under-secures train on 1.2% grade (9 brakes per MMA procedure vs. 17-26 needed per TSB)",
+      "humanErrorType": "Knowledge-based mistake (latent, organisational)",
+      "psf": ["Procedures", "Regulatory oversight", "Safety culture", "Training"],
+      "comments": "Transport Canada does not validate railways' special instructions or specify number of brakes. Sources differ on MMA's stated requirement (9 brakes per TSB/charges; 5 locomotives + 11 cars per MMA claim)."
+    },
+    {
+      "id": "r4", "taskId": "1.1.3",
+      "externalErrorMode": "Single-person operation allowed without the public permit process; no second crew member",
+      "recovery": "Second person could have performed stabilisation test or checked securement",
+      "consequence": "No independent check of securement or brake test; no ground person",
+      "humanErrorType": "Rule-based mistake (organisational / regulatory decision)",
+      "psf": ["Regulatory oversight", "Cost cutting", "Staffing", "Workload"],
+      "comments": "Average of about 80 tank cars per train under one person. TSB could not conclude whether a second crew member would have prevented the accident."
+    },
+    {
+      "id": "r5", "taskId": "1.1.4",
+      "externalErrorMode": "Repeated CROR s.112 hand-brake violations at Nantes met only by reprimands, no fines",
+      "recovery": "Regulator inspection; company audit and supervision",
+      "consequence": "Non-compliant securement practice normalised; no corrective barrier before the accident",
+      "humanErrorType": "Routine violation (tolerated)",
+      "psf": ["Safety culture", "Regulatory oversight", "Cost cutting"],
+      "comments": "Reprimands 2004-2009, 2011 and 2012. Auditor General (2011) found weak follow-up by Transport Canada. No rule prohibited leaving an unattended train on the main line."
+    },
+    {
+      "id": "r6", "taskId": "1.2.1",
+      "externalErrorMode": "Defective locomotive continued in service despite abnormal smoke and engine surges",
+      "recovery": "Report to RTC; locomotive swap; stop and wait for repair",
+      "consequence": "Train with known-defective lead locomotive arrives at Nantes; fire risk while unattended",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Cost and time pressure", "Equipment condition", "Single-person operation", "Fatigue (night, long shift)"],
+      "comments": "Engineer told the RTC that the locomotive had mechanical difficulties throughout the trip."
+    },
+    {
+      "id": "r7", "taskId": "1.2.2",
+      "externalErrorMode": "", "recovery": "", "consequence": "", "humanErrorType": "", "psf": [],
+      "comments": "Train stopped at about 23:00 at the designated crew-change point at Nantes, 11 km west of Lac-Mégantic."
+    },
+    {
+      "id": "r8", "taskId": "1.3.1",
+      "externalErrorMode": "Train parked on main line instead of siding with derail",
+      "recovery": "Siding with derail; alternative crew-change location",
+      "consequence": "Loaded train unattended on main line above town with no physical barrier against runaway",
+      "humanErrorType": "Rule-based mistake (constrained by circumstances)",
+      "psf": ["Infrastructure / layout (siding used to store Tafisa boxcars)", "Operating plan", "Procedures"],
+      "comments": "TSB: MMA operating plan was to leave the train on the main line, unattended, cab unlocked, next to a public highway. Transport Canada called it unusual, but no regulation prohibited it."
+    },
+    {
+      "id": "r9", "taskId": "1.3.2",
+      "externalErrorMode": "Brake holding relied on air system that depends on a running compressor",
+      "recovery": "Hand brakes; keeping a locomotive running to feed the compressor",
+      "consequence": "Air-brake effectiveness decays as air leaks once compressors stop",
+      "humanErrorType": "Knowledge-based mistake (latent)",
+      "psf": ["Equipment design", "Procedures", "Training"],
+      "comments": "Slow, steady leakage does not trigger automatic brake application."
+    },
+    {
+      "id": "r10", "taskId": "1.4.1",
+      "externalErrorMode": "Too few hand brakes judged sufficient",
+      "recovery": "Hand-brake test; RTC check of hand-brake count (not required at the time)",
+      "consequence": "Seven hand brakes applied vs. 17-26 needed (TSB); none on the 72 tank cars",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": ["Procedures (no grade guidance)", "Training", "Fatigue", "Single-person operation"],
+      "comments": "Reports differ: an MMA board member claimed 5 locomotives and 10 cars; TSB agrees with the engineer's statement (5 locomotives, buffer car, remote-control car)."
+    },
+    {
+      "id": "r11", "taskId": "1.4.2",
+      "externalErrorMode": "Hand brakes applied on too few vehicles and with variable force",
+      "recovery": "Retarding force check via push/pull test; second person to verify",
+      "consequence": "Train held only by air brakes plus a few hand brakes",
+      "humanErrorType": "Skill-based slip",
+      "psf": ["Workload (one person at night)", "Physical effort", "Fatigue", "Single-person operation"],
+      "comments": "Hand-brake effectiveness depends on age, maintenance and the force exerted by the person applying it."
+    },
+    {
+      "id": "r12", "taskId": "1.4.3",
+      "externalErrorMode": "Hand-brake test performed with locomotive air brakes still applied",
+      "recovery": "Second person performing the test; releasing all air brakes and checking that the train holds",
+      "consequence": "False confidence that hand brakes alone would hold the train",
+      "humanErrorType": "Skill-based slip (omitted step)",
+      "psf": ["Single-person operation", "Interface (brake state not visible)", "Fatigue", "Training"],
+      "comments": "CROR s.112 requires hand-brake effectiveness to be tested. In the second trial the engineer was convicted under railway safety legislation for not testing the hand brakes; the 2018 criminal negligence trial ended in acquittal."
+    },
+    {
+      "id": "r13", "taskId": "1.4.4",
+      "externalErrorMode": "Four of five locomotives shut down; 5017 left running, cab unlocked, reverser not removed",
+      "recovery": "Locked cab and removed reverser (required only after July 2013 emergency directive)",
+      "consequence": "Defective engine left running unattended; later shutdown by third parties removes air supply to brakes",
+      "humanErrorType": "Rule-based mistake (consistent with prevailing practice)",
+      "psf": ["Procedures (no rule against it)", "Equipment condition", "Safety culture"],
+      "comments": "TSB: reset safety control on 5017 was not wired to apply the whole train's brakes on engine failure."
+    },
+    {
+      "id": "r14", "taskId": "1.5.1",
+      "externalErrorMode": "Train reported secure without independent verification of securement",
+      "recovery": "RTC requests hand-brake count and grade (not required at the time)",
+      "consequence": "RTC holds a false picture of train securement",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Procedures", "Communication", "Single-person operation"],
+      "comments": "The FRA emergency order of 2 August 2013 later required notification of hand-brake count, train length, grade and weather before leaving a train unattended."
+    },
+    {
+      "id": "r15", "taskId": "1.5.2",
+      "externalErrorMode": "Defect reported but fire risk and unattended running not escalated or risk-assessed",
+      "recovery": "RTC orders repair, locomotive swap or keeps crew on site",
+      "consequence": "Parties agree to deal with the smoking locomotive the next morning; defective engine runs unattended overnight",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Cost pressure", "Communication", "Procedures (no risk-assessment step)", "Safety culture"],
+      "comments": "Report made to the RTC in Bangor, Maine."
+    },
+    {
+      "id": "r16", "taskId": "1.5.3",
+      "externalErrorMode": "No action required on defective locomotive that night",
+      "recovery": "Management escalation; locomotive removal from service",
+      "consequence": "No barrier against locomotive fire while the train is unattended",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Cost pressure", "Staffing", "Procedures", "Safety culture"],
+      "comments": "TSB identified a lack of backup safety mechanisms and several failures of training and oversight."
+    },
+    {
+      "id": "r17", "taskId": "1.5.4",
+      "externalErrorMode": "Safety concern voiced but escalation not documented",
+      "recovery": "Call to MMA US office (Hermon, Maine); remaining on site",
+      "consequence": "Train left unattended overnight with running, smoking locomotive",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Fatigue (end of 12-hour shift)", "Authority gradient", "Procedures"],
+      "comments": "Engineer told the taxi driver he felt unsafe and wanted to call the US office. Sources reviewed do not state whether the call was made."
+    },
+    {
+      "id": "r18", "taskId": "1.6.1",
+      "externalErrorMode": "", "recovery": "", "consequence": "", "humanErrorType": "", "psf": [],
+      "comments": "A citizen called 911 at 23:50 about a fire on the first locomotive. Nantes fire department and a Sûreté du Québec officer responded."
+    },
+    {
+      "id": "r19", "taskId": "1.6.2",
+      "externalErrorMode": "Engine shut down per fire protocol without awareness of the air-brake consequence",
+      "recovery": "Qualified railway employee on site; restart of compressor",
+      "consequence": "Compressor stops; air brakes slowly lose effectiveness",
+      "humanErrorType": "Knowledge-based mistake (latent)",
+      "psf": ["Training / information", "Emergency-response procedure", "Communication with railway", "Time pressure"],
+      "comments": "Fire chief: protocol is to shut the engine down to stop fuel feeding the fire. Locomotives that could restart the air brakes automatically were shut down."
+    },
+    {
+      "id": "r20", "taskId": "1.6.3",
+      "externalErrorMode": "Engineer not recalled; track maintenance foreman unfamiliar with air brakes sent instead",
+      "recovery": "Recall engineer or other qualified crew; consult brake expert",
+      "consequence": "Nobody with air-brake competence re-assessed securement after the engine was shut down",
+      "humanErrorType": "Rule-based mistake",
+      "psf": ["Competence / training", "Communication", "Staffing", "Safety culture"],
+      "comments": "MMA did not grant permission for the engineer to return to the scene."
+    },
+    {
+      "id": "r21", "taskId": "1.6.4",
+      "externalErrorMode": "Train confirmed safe without testing brakes or checking air pressure",
+      "recovery": "Hand-brake test; check of air pressure and hand-brake count",
+      "consequence": "Last barrier lost at about 00:13; firefighters leave and the train stays unattended until it starts to roll at 00:56",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": ["Training", "Procedures", "Authority", "Time (night)"],
+      "comments": "Two MMA track maintenance employees arrived by 00:13 and told the police officer and the Farnham RTC that the train was safe."
+    },
+    {
+      "id": "r22", "taskId": "1.7.1",
+      "externalErrorMode": "Air pressure falls until brakes and hand brakes cannot hold the train (00:56)",
+      "recovery": "Running compressor (shut down); automatic restart of air-brake system; more hand brakes; derail",
+      "consequence": "Train begins to roll towards Lac-Mégantic, 11 km away on a 1.2% grade",
+      "humanErrorType": "Latent condition (no active error at this step)",
+      "psf": ["Equipment design", "Procedures", "Organisational decisions upstream (see 1.1-1.6)"],
+      "comments": "Nantes siding had a derail that could have prevented accidental departure; it was not used."
+    },
+    {
+      "id": "r23", "taskId": "1.7.2",
+      "externalErrorMode": "Runaway not detected: no track circuits or other monitoring on the line",
+      "recovery": "Track circuits alerting the RTC; witnesses; level-crossing warnings",
+      "consequence": "Train accelerates unnoticed down the grade and reaches about 105 km/h, over six times the 16 km/h limit at the yard",
+      "humanErrorType": "Latent condition (no active error at this step)",
+      "psf": ["Infrastructure (dark territory)", "Regulatory requirements", "Monitoring design"],
+      "comments": "A firefighter saw the train pass a crossing about ten minutes before the derailment, without lights or horn."
+    },
+    {
+      "id": "r24", "taskId": "1.7.3",
+      "externalErrorMode": "No barrier able to stop or warn about the runaway train",
+      "recovery": "None effective",
+      "consequence": "Derailment at about 01:14; 63 of 72 tank cars derailed, about 6 million litres of crude released, fire and explosions; 47 killed, more than 30 buildings destroyed",
+      "humanErrorType": "Latent condition (no active error at this step)",
+      "psf": ["Lack of safety redundancy", "DOT-111 tank car vulnerability", "Track alignment through town centre", "Regulatory oversight"],
+      "comments": "Heavy damage also driven by DOT-111 tank cars known for high failure rates in accidents."
+    }
+  ]
+}

@@ -10,16 +10,6 @@
   const SPLIT_MIN_PCT = 20;
   const SPLIT_MAX_PCT = 75;
 
-  const DEFAULT_COLUMNS = [
-    { id: "taskStep", label: "Task Step", visible: true, order: 0 },
-    { id: "externalErrorMode", label: "External Error Mode", visible: true, order: 1 },
-    { id: "recovery", label: "Recovery", visible: true, order: 2 },
-    { id: "consequence", label: "Consequence", visible: true, order: 3 },
-    { id: "humanErrorType", label: "Human Error Type", visible: true, order: 4 },
-    { id: "psf", label: "PSFs", visible: true, order: 5 },
-    { id: "comments", label: "Comments", visible: true, order: 6 },
-  ];
-
   const EXTERNAL_ERROR_MODES = [
     "Omission",
     "Action too much",
@@ -29,6 +19,29 @@
     "Mis-ordering",
     "Wrong action",
   ];
+
+  /* The HEI columns: used for a new analysis and for files without meta.columns, and restored by Reset. They are
+     ordinary columns: an analysis can rename or delete any of them. Only taskStep (the link to the HTA task) is
+     always there. Each column has a short description: it shows as the header's tooltip and tells the AI support
+     what the column means. A renamed HEI column does not keep the default description (see normalizeColumns). */
+  const DEFAULT_COLUMNS = [
+    { id: "taskStep", label: "Task Step", visible: true, order: 0,
+      description: "The HTA task this row analyses (id and title)." },
+    { id: "externalErrorMode", label: "External Error Mode", visible: true, order: 1,
+      type: "select", options: EXTERNAL_ERROR_MODES,
+      description: "How the task can go wrong, e.g. omission, action too early or too late, wrong action." },
+    { id: "recovery", label: "Recovery", visible: true, order: 2, type: "text",
+      description: "How the error can be noticed and corrected before it has an effect, and at which step." },
+    { id: "consequence", label: "Consequence", visible: true, order: 3, type: "text",
+      description: "What happens if the error is not recovered." },
+    { id: "humanErrorType", label: "Human Error Type", visible: true, order: 4, type: "text",
+      description: "The kind of error: slip, lapse, rule- or knowledge-based mistake, or violation." },
+    { id: "psf", label: "PSFs", visible: true, order: 5, type: "list",
+      description: "Performance shaping factors that make the error more likely, e.g. time pressure, interface, training. Separate with commas." },
+    { id: "comments", label: "Comments", visible: true, order: 6, type: "text",
+      description: "Notes, open questions and proposed measures." },
+  ];
+  const defaultColumns = () => JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
 
   const hierarchyEl = document.getElementById("hierarchy");
   const connectorsSvg = document.getElementById("connectors");
@@ -344,7 +357,7 @@
     }
     if (root) reassignIds(root);
     const columns = normalizeColumns(raw?.meta?.columns);
-    const ttaRecords = normalizeTtaRecords(raw?.ttaRecords);
+    const ttaRecords = normalizeTtaRecords(raw?.ttaRecords, columns);
     return {
       version: DIAGRAM_VERSION,
       meta: { theme, columns },
@@ -353,6 +366,15 @@
     };
   }
 
+  /** Ids a column cannot use: the row's own fields. */
+  const RESERVED_RECORD_KEYS = new Set(["id", "taskId", "taskStep"]);
+
+  /**
+   * Columns come from meta.columns, exactly as the analysis defines them; a file without columns gets the HEI
+   * columns. Only taskStep is added when missing. Per column: id, label, description, type ("text" | "list" |
+   * "select"), options (for select), visible, order. A column with an HEI id and no type of its own takes the HEI
+   * type (older files), and an HEI column keeps its default description only while its label is the default.
+   */
   function normalizeColumns(cols) {
     if (!Array.isArray(cols) || !cols.length) {
       try {
@@ -363,39 +385,68 @@
       } catch (_) {
         /* ignore */
       }
-      return DEFAULT_COLUMNS.map((c) => ({ ...c }));
+      return defaultColumns();
     }
-    const byId = new Map(cols.map((c) => [c.id, c]));
-    return DEFAULT_COLUMNS.map((def, i) => {
-      const hit = byId.get(def.id);
-      return {
-        id: def.id,
-        label: def.label,
-        visible: hit?.visible !== false,
-        order: typeof hit?.order === "number" ? hit.order : i,
+    const defById = new Map(DEFAULT_COLUMNS.map((c) => [c.id, c]));
+    const seen = new Set();
+    const out = [];
+    cols.forEach((c, i) => {
+      if (!c || typeof c.id !== "string" || !c.id.trim() || seen.has(c.id)) return;
+      if (c.id !== "taskStep" && RESERVED_RECORD_KEYS.has(c.id)) return;
+      seen.add(c.id);
+      const def = defById.get(c.id);
+      const label = String(c.label || def?.label || c.id);
+      const options = Array.isArray(c.options) && c.options.length ? c.options.map(String) : null;
+      let type = ["text", "list", "select"].includes(c.type) ? c.type : options ? "select" : def?.type || "text";
+      const col = {
+        id: c.id,
+        label,
+        description:
+          typeof c.description === "string"
+            ? c.description.trim()
+            : def && label === def.label ? def.description : "",
+        visible: c.visible !== false,
+        order: typeof c.order === "number" ? c.order : def ? def.order : i,
       };
-    }).sort((a, b) => a.order - b.order);
+      if (c.id !== "taskStep") {
+        const opts = options || (type === "select" && def?.options ? [...def.options] : null);
+        if (type === "select" && !opts) type = "text";
+        col.type = type;
+        if (type === "select") col.options = opts;
+      }
+      out.push(col);
+    });
+    if (!seen.has("taskStep")) {
+      out.push({ ...defaultColumns()[0], order: Math.min(0, ...out.map((c) => c.order)) - 1 });
+    }
+    return out.sort((a, b) => a.order - b.order);
   }
 
-  function normalizeTtaRecords(list) {
+  /** A value in the shape its column expects: a list column holds an array of strings, others a string. */
+  function columnValue(col, value) {
+    if (col.type === "list") {
+      return Array.isArray(value)
+        ? value.map(String).filter(Boolean)
+        : String(value ?? "").split(",").map((v) => v.trim()).filter(Boolean);
+    }
+    return Array.isArray(value) ? value.join(", ") : String(value ?? "");
+  }
+
+  /** Rows keep every field they have (nothing is dropped on import); the columns' fields get their shape. */
+  function normalizeTtaRecords(list, columns) {
     if (!Array.isArray(list)) return [];
+    const cols = (columns || []).filter((c) => c.id !== "taskStep");
     return list
       .filter((r) => r && typeof r === "object")
-      .map((r, i) => ({
-        id: typeof r.id === "string" && r.id ? r.id : `r${i + 1}`,
-        taskId: String(r.taskId || ""),
-        externalErrorMode: String(r.externalErrorMode || ""),
-        recovery: String(r.recovery || ""),
-        consequence: String(r.consequence || ""),
-        humanErrorType: String(r.humanErrorType || ""),
-        psf: Array.isArray(r.psf)
-          ? r.psf.map(String)
-          : String(r.psf || "")
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean),
-        comments: String(r.comments || ""),
-      }));
+      .map((r, i) => {
+        const out = JSON.parse(JSON.stringify(r));
+        out.id = typeof r.id === "string" && r.id ? r.id : `r${i + 1}`;
+        out.taskId = String(r.taskId || "");
+        cols.forEach((c) => {
+          out[c.id] = columnValue(c, r[c.id]);
+        });
+        return out;
+      });
   }
 
   function newRecordId() {
@@ -410,7 +461,7 @@
     reassignIds(root);
     return {
       version: DIAGRAM_VERSION,
-      meta: { theme: "light", columns: DEFAULT_COLUMNS.map((c) => ({ ...c })) },
+      meta: { theme: "light", columns: defaultColumns() },
       root,
       ttaRecords: [
         {
@@ -457,10 +508,7 @@
         columns: (s.meta?.columns || DEFAULT_COLUMNS).map((c) => ({ ...c })),
       },
       root: cloneNode(s.root),
-      ttaRecords: (s.ttaRecords || []).map((r) => ({
-        ...r,
-        psf: [...(r.psf || [])],
-      })),
+      ttaRecords: JSON.parse(JSON.stringify(s.ttaRecords || [])),
     };
   }
 
@@ -470,7 +518,7 @@
       const theme = document.body.dataset.theme === "dark" ? "dark" : "light";
       return {
         version: DIAGRAM_VERSION,
-        meta: { theme, columns: DEFAULT_COLUMNS.map((c) => ({ ...c })) },
+        meta: { theme, columns: defaultColumns() },
         root,
         ttaRecords: [],
       };
@@ -646,7 +694,7 @@
     return true;
   }
 
-  /** Selected: ↑↓ reorder among siblings (subtree moves with the task). */
+  /** Selected: ←→ reorder among siblings (subtree moves with the task). */
   function moveSelectedAmongSiblings(direction) {
     const selectedId = ui.selectedTaskId;
     if (!selectedId || !state?.root) return false;
@@ -668,7 +716,7 @@
   }
 
   /**
-   * Selected ← : outdent — become next sibling of current parent
+   * Selected ↑ : outdent — become next sibling of current parent
    * (subtree stays attached). No-op for root or top-level children.
    */
   function outdentSelected() {
@@ -698,7 +746,7 @@
   }
 
   /**
-   * Selected → : indent — become last child of previous sibling
+   * Selected ↓ : indent — become last child of previous sibling
    * (subtree stays attached).
    */
   function indentSelected() {
@@ -724,10 +772,10 @@
 
   function handleSelectedArrow(key) {
     if (!ui.selectedTaskId) return false;
-    if (key === "ArrowUp") return moveSelectedAmongSiblings(-1);
-    if (key === "ArrowDown") return moveSelectedAmongSiblings(1);
-    if (key === "ArrowLeft") return outdentSelected();
-    if (key === "ArrowRight") return indentSelected();
+    if (key === "ArrowLeft") return moveSelectedAmongSiblings(-1);
+    if (key === "ArrowRight") return moveSelectedAmongSiblings(1);
+    if (key === "ArrowUp") return outdentSelected();
+    if (key === "ArrowDown") return indentSelected();
     return false;
   }
 
@@ -896,16 +944,11 @@
   }
 
   function emptyTtaRecord(taskId) {
-    return {
-      id: newRecordId(),
-      taskId,
-      externalErrorMode: "",
-      recovery: "",
-      consequence: "",
-      humanErrorType: "",
-      psf: [],
-      comments: "",
-    };
+    const rec = { id: newRecordId(), taskId };
+    (state?.meta?.columns || DEFAULT_COLUMNS).forEach((c) => {
+      if (c.id !== "taskStep") rec[c.id] = columnValue(c, "");
+    });
+    return rec;
   }
 
   /** Every HTA task appears in TTA (≥1 row); drop orphan records. */
@@ -952,12 +995,28 @@
     cols.forEach((col) => {
       const th = document.createElement("th");
       th.dataset.col = col.id;
+      th.className = "tta-col-head";
       th.textContent = col.label;
+      th.title = `${col.description ? col.description + "\n\n" : ""}Click to edit the column`;
+      th.tabIndex = 0;
+      th.addEventListener("click", () => openColumnEditor(col.id));
+      th.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        e.stopPropagation();
+        openColumnEditor(col.id);
+      });
       trh.appendChild(th);
     });
+    const delHead = document.createElement("th");
+    delHead.className = "tta-del-col";
+    delHead.setAttribute("aria-label", "Delete row");
+    trh.appendChild(delHead);
     ttaThead.appendChild(trh);
 
     ttaTbody.innerHTML = "";
+    const rowsPerTask = new Map();
+    (state.ttaRecords || []).forEach((r) => rowsPerTask.set(r.taskId, (rowsPerTask.get(r.taskId) || 0) + 1));
     orderedTtaRows().forEach((rec) => {
       const tr = document.createElement("tr");
       tr.dataset.recordId = rec.id;
@@ -966,8 +1025,9 @@
         tr.classList.add("is-selected");
       }
       tr.addEventListener("click", (e) => {
-        if (e.target.closest("[contenteditable], select")) return;
+        if (e.target.closest("[contenteditable], select, button")) return;
         selectTask(rec.taskId, { skipTextFocus: true });
+        centerTaskInViewport(rec.taskId);
       });
 
       cols.forEach((col) => {
@@ -976,41 +1036,41 @@
         if (col.id === "taskStep") {
           td.className = "tta-task-ref";
           td.textContent = taskRefFor(rec.taskId);
-        } else if (col.id === "externalErrorMode") {
+        } else if (col.type === "select" && col.options) {
+          const key = col.id;
+          const choices = col.options;
           const sel = document.createElement("select");
           const blank = document.createElement("option");
           blank.value = "";
           blank.textContent = "—";
-          if (!rec.externalErrorMode) blank.selected = true;
+          if (!rec[key]) blank.selected = true;
           sel.appendChild(blank);
-          EXTERNAL_ERROR_MODES.forEach((m) => {
+          choices.forEach((m) => {
             const opt = document.createElement("option");
             opt.value = m;
             opt.textContent = m;
-            if (m === rec.externalErrorMode) opt.selected = true;
+            if (m === rec[key]) opt.selected = true;
             sel.appendChild(opt);
           });
-          if (
-            rec.externalErrorMode &&
-            !EXTERNAL_ERROR_MODES.includes(rec.externalErrorMode)
-          ) {
+          if (rec[key] && !choices.includes(rec[key])) {
             const opt = document.createElement("option");
-            opt.value = rec.externalErrorMode;
+            opt.value = rec[key];
             opt.selected = true;
-            opt.textContent = rec.externalErrorMode;
+            opt.textContent = rec[key];
             sel.appendChild(opt);
           }
           sel.addEventListener("change", () => {
-            rec.externalErrorMode = sel.value;
+            rec[key] = sel.value;
             commit(() => {});
           });
           td.appendChild(sel);
-        } else if (col.id === "psf") {
+        } else if (col.type === "list") {
+          const key = col.id;
           td.contentEditable = "true";
           td.spellcheck = false;
-          td.textContent = (rec.psf || []).join(", ");
+          td.textContent = [].concat(rec[key] || []).join(", ");
           td.addEventListener("blur", () => {
-            rec.psf = readEditableText(td)
+            rec[key] = readEditableText(td)
               .split(",")
               .map((s) => s.trim())
               .filter(Boolean);
@@ -1028,10 +1088,51 @@
         }
         tr.appendChild(td);
       });
+      tr.appendChild(rowDeleteCell(rec, rowsPerTask.get(rec.taskId) > 1));
       ttaTbody.appendChild(tr);
     });
 
     renderColumnPicker();
+  }
+
+  /** ✕ at the end of a row (design principles 4.2): deletes the row, or clears it when it is the task's only row,
+      since every task keeps at least one TTA row. No question asked: Ctrl/⌘+Z undoes it. */
+  function rowDeleteCell(rec, canDelete) {
+    const td = document.createElement("td");
+    td.className = "tta-del-cell";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tta-row-del";
+    btn.textContent = "✕";
+    const task = taskRefFor(rec.taskId);
+    btn.title = canDelete
+      ? `Delete this row of ${task}`
+      : `Clear this row (${task} keeps at least one row)`;
+    btn.setAttribute("aria-label", canDelete ? `Delete row of ${task}` : `Clear row of ${task}`);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteTtaRow(rec.id);
+    });
+    td.appendChild(btn);
+    return td;
+  }
+
+  function deleteTtaRow(recordId) {
+    const rec = (state.ttaRecords || []).find((r) => r.id === recordId);
+    if (!rec) return;
+    const task = taskRefFor(rec.taskId);
+    const others = state.ttaRecords.filter((r) => r.taskId === rec.taskId && r.id !== recordId).length;
+    commit((s) => {
+      if (others) {
+        s.ttaRecords = s.ttaRecords.filter((r) => r.id !== recordId);
+        return;
+      }
+      const row = s.ttaRecords.find((r) => r.id === recordId);
+      (s.meta.columns || []).forEach((c) => {
+        if (c.id !== "taskStep") row[c.id] = columnValue(c, "");
+      });
+    });
+    showStatus(`${others ? "Row deleted" : "Row cleared"} (${task}). Ctrl/⌘+Z undoes it.`, "success");
   }
 
   function renderColumnPicker() {
@@ -1052,9 +1153,122 @@
         });
         label.appendChild(cb);
         label.appendChild(document.createTextNode(col.label));
-        columnPickerList.appendChild(label);
+        if (col.description) label.title = col.description;
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "col-edit";
+        edit.textContent = "Edit…";
+        edit.title = `Edit name and description of "${col.label}"`;
+        edit.addEventListener("click", () => openColumnEditor(col.id));
+        const row = document.createElement("div");
+        row.className = "col-row";
+        row.append(label, edit);
+        columnPickerList.appendChild(row);
       });
   }
+
+  // ---------- Column editor (name, description, custom columns) ----------
+
+  const columnDialog = document.getElementById("column-dialog");
+  const columnForm = document.getElementById("column-form");
+  const columnLabelInput = document.getElementById("column-label");
+  const columnDescInput = document.getElementById("column-description");
+  const columnDeleteBtn = document.getElementById("column-delete");
+  const columnDialogTitle = document.getElementById("column-dialog-title");
+  let editingColumnId = null; // null while adding a new column
+
+  /** Every column can be deleted except taskStep, the link to the HTA task. */
+  const canDeleteColumn = (id) => id !== "taskStep";
+
+  /** Column id made from the label: camelCase ASCII, unique, never a built-in or reserved record key. */
+  function makeColumnId(label, columns) {
+    const words = String(label)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Za-z0-9]+/g, " ")
+      .trim()
+      .split(" ")
+      .filter(Boolean);
+    let base = words
+      .map((w, i) => (i ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()))
+      .join("");
+    if (!base || /^[0-9]/.test(base)) base = `col${base}`;
+    const taken = new Set([...(columns || []).map((c) => c.id), ...RESERVED_RECORD_KEYS]);
+    let id = base;
+    for (let n = 2; taken.has(id); n++) id = `${base}${n}`;
+    return id;
+  }
+
+  function openColumnEditor(id) {
+    if (!columnDialog || !state?.meta?.columns) return;
+    const col = id ? state.meta.columns.find((c) => c.id === id) : null;
+    if (id && !col) return;
+    editingColumnId = col ? col.id : null;
+    columnDialogTitle.textContent = col ? "Edit column" : "New column";
+    columnLabelInput.value = col ? col.label : "";
+    columnDescInput.value = col ? col.description || "" : "";
+    columnDeleteBtn.hidden = !col || !canDeleteColumn(col.id);
+    columnPicker?.classList.remove("open");
+    columnDialog.showModal();
+    columnLabelInput.focus();
+    columnLabelInput.select();
+  }
+
+  function saveColumnEditor() {
+    const label = columnLabelInput.value.trim();
+    const description = columnDescInput.value.trim();
+    if (!label) {
+      showStatus("A column needs a name", "error");
+      columnLabelInput.focus();
+      return false;
+    }
+    const id = editingColumnId;
+    commit((s) => {
+      if (id) {
+        const col = s.meta.columns.find((c) => c.id === id);
+        if (!col) return;
+        col.label = label;
+        col.description = description;
+        return;
+      }
+      const newId = makeColumnId(label, s.meta.columns);
+      const order = Math.max(-1, ...s.meta.columns.map((c) => c.order)) + 1;
+      s.meta.columns.push({ id: newId, label, description, visible: true, order, type: "text" });
+      (s.ttaRecords || []).forEach((r) => {
+        if (r[newId] === undefined) r[newId] = "";
+      });
+    });
+    persistColumns();
+    showStatus(id ? `Column "${label}" updated` : `Column "${label}" added`, "success");
+    return true;
+  }
+
+  function deleteEditedColumn() {
+    const id = editingColumnId;
+    const col = id && state.meta.columns.find((c) => c.id === id);
+    if (!col || !canDeleteColumn(id)) return;
+    const filled = (state.ttaRecords || []).filter((r) => String(r[id] ?? "").trim()).length;
+    const note = filled ? ` Its values in ${filled} row${filled === 1 ? "" : "s"} are removed too.` : "";
+    if (!window.confirm(`Delete the column "${col.label}"?${note} (Ctrl/⌘+Z undoes it.)`)) return;
+    columnDialog.close();
+    commit((s) => {
+      s.meta.columns = s.meta.columns.filter((c) => c.id !== id);
+      (s.ttaRecords || []).forEach((r) => {
+        delete r[id];
+      });
+    });
+    persistColumns();
+    showStatus(`Column "${col.label}" deleted`, "success");
+  }
+
+  columnForm?.addEventListener("submit", (e) => {
+    if (e.submitter?.value === "cancel") return; // closes the dialog without saving
+    e.preventDefault();
+    if (saveColumnEditor()) columnDialog.close();
+  });
+  columnDeleteBtn?.addEventListener("click", deleteEditedColumn);
+  // Keep keys typed in the dialog from reaching the editor's global shortcuts; Esc closes natively.
+  columnDialog?.addEventListener("keydown", (e) => e.stopPropagation());
 
   function highlightTtaForTask(taskId) {
     if (!ttaTbody) return;
@@ -1067,6 +1281,20 @@
     if (first) {
       first.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
+  }
+
+  /** Scroll the HTA viewport so the task box is centred (used when a TTA row is clicked). */
+  function centerTaskInViewport(taskId) {
+    const el = taskElements.get(taskId);
+    if (!el || !htaViewport) return;
+    const box = el.querySelector(".task-box") || el;
+    const v = htaViewport.getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    htaViewport.scrollTo({
+      left: Math.max(0, htaViewport.scrollLeft + (b.left + b.width / 2) - (v.left + v.width / 2)),
+      top: Math.max(0, htaViewport.scrollTop + (b.top + b.height / 2) - (v.top + v.height / 2)),
+      behavior: "smooth",
+    });
   }
 
   function applySelectionUI() {
@@ -1173,7 +1401,7 @@
     clearKeyboardHover();
     if (!next.ttaRecords) next.ttaRecords = [];
     if (!next.meta) next.meta = {};
-    if (!next.meta.columns) next.meta.columns = DEFAULT_COLUMNS.map((c) => ({ ...c }));
+    if (!next.meta.columns) next.meta.columns = defaultColumns();
     ensureTtaCoversAllTasks(next);
     state = next;
     setTheme(state.meta?.theme || "light");
@@ -1187,7 +1415,7 @@
     if (!state) state = hydrateFromDom();
     if (!state.ttaRecords) state.ttaRecords = [];
     if (!state.meta) state.meta = { theme: "light" };
-    if (!state.meta.columns) state.meta.columns = DEFAULT_COLUMNS.map((c) => ({ ...c }));
+    if (!state.meta.columns) state.meta.columns = defaultColumns();
     mutator(state);
     ensureTtaCoversAllTasks(state);
     const warnings = validateState(state);
@@ -1376,14 +1604,9 @@
         (s.ttaRecords || []).forEach((r) => {
           if (r.taskId === n._srcId) {
             copies.push({
+              ...JSON.parse(JSON.stringify(r)),
               id: newRecordId(),
               taskId: null,
-              externalErrorMode: r.externalErrorMode,
-              recovery: r.recovery,
-              consequence: r.consequence,
-              humanErrorType: r.humanErrorType,
-              psf: [...(r.psf || [])],
-              comments: r.comments,
               _bind: n,
             });
           }
@@ -1437,16 +1660,7 @@
     }
     commit((s) => {
       if (!s.ttaRecords) s.ttaRecords = [];
-      s.ttaRecords.push({
-        id: newRecordId(),
-        taskId,
-        externalErrorMode: "Omission",
-        recovery: "",
-        consequence: "",
-        humanErrorType: "",
-        psf: [],
-        comments: "",
-      });
+      s.ttaRecords.push(emptyTtaRecord(taskId));
     });
     selectTask(taskId, { skipTextFocus: true });
   }
@@ -1455,12 +1669,23 @@
     columnPicker?.classList.toggle("open");
   }
 
+  /** The HEI columns come back with their default name, description, type and order (with empty values where they
+      were deleted); other columns stay, after them. */
   function resetColumns() {
     if (!state) return;
-    state.meta.columns = DEFAULT_COLUMNS.map((c) => ({ ...c }));
+    commit((s) => {
+      const heiIds = new Set(DEFAULT_COLUMNS.map((c) => c.id));
+      const others = (s.meta.columns || [])
+        .filter((c) => !heiIds.has(c.id))
+        .sort((a, b) => a.order - b.order);
+      s.meta.columns = [
+        ...defaultColumns(),
+        ...others.map((c, i) => ({ ...c, visible: true, order: DEFAULT_COLUMNS.length + i })),
+      ];
+      s.ttaRecords = normalizeTtaRecords(s.ttaRecords, s.meta.columns);
+    });
     persistColumns();
-    renderTta();
-    showStatus("Columns reset", "success");
+    showStatus("HEI columns restored", "success");
   }
 
   // ---------- Text history ----------
@@ -1590,18 +1815,11 @@
       if (oa !== ob) return oa - ob;
       return String(a.id).localeCompare(String(b.id));
     });
-    const headers = [
-      "Depth",
-      "ID",
-      "Title",
-      "Outline",
-      "External Error Mode",
-      "Recovery",
-      "Consequence",
-      "Human Error Type",
-      "PSFs",
-      "Comments",
-    ];
+    const dataCols = (s.meta?.columns || DEFAULT_COLUMNS)
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .filter((c) => c.id !== "taskStep");
+    const headers = ["Depth", "ID", "Title", "Outline", ...dataCols.map((c) => c.label)];
     const lines = [headers.map(csvEscape).join(",")];
     records.forEach((rec) => {
       const node = findTask(s.root, rec.taskId);
@@ -1619,12 +1837,10 @@
           id,
           title,
           outline,
-          rec.externalErrorMode || "",
-          rec.recovery || "",
-          rec.consequence || "",
-          rec.humanErrorType || "",
-          (rec.psf || []).join("; "),
-          rec.comments || "",
+          ...dataCols.map((c) => {
+            const v = rec[c.id];
+            return Array.isArray(v) ? v.join("; ") : v || "";
+          }),
         ]
           .map(csvEscape)
           .join(",")
@@ -1670,6 +1886,7 @@
     addTtaRow: () => addTtaRow(),
     toggleColumnPicker: () => toggleColumnPicker(),
     resetColumns: () => resetColumns(),
+    addColumn: () => openColumnEditor(null),
     toggleHelp: () => {
       const dlg = document.getElementById("help-dialog");
       if (!dlg) return;

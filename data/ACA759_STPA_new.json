@@ -1,0 +1,1164 @@
+{
+  "version": 2,
+  "meta": {
+    "theme": "light",
+    "title": "HTA/TTA - Air Canada 759 taxiway overflight, SFO, 7 July 2017 (input to STPA)",
+    "source": "NTSB/AIR-18/01, Aircraft Incident Report, adopted 25 Sep 2018",
+    "columns": [
+      {
+        "id": "taskStep",
+        "label": "Control Action / Task Step",
+        "visible": true,
+        "order": 0
+      },
+      {
+        "id": "controller",
+        "label": "Controller",
+        "visible": true,
+        "order": 1
+      },
+      {
+        "id": "externalErrorMode",
+        "label": "Unsafe Control Action (UCA)",
+        "visible": true,
+        "order": 2,
+        "type": "text"
+      },
+      {
+        "id": "hazards",
+        "label": "Hazards (H)",
+        "visible": true,
+        "order": 3
+      },
+      {
+        "id": "consequence",
+        "label": "Hazard / Loss",
+        "visible": true,
+        "order": 4
+      },
+      {
+        "id": "humanErrorType",
+        "label": "Human Error Type",
+        "visible": true,
+        "order": 5
+      },
+      {
+        "id": "psf",
+        "label": "Causal Factors (PSFs)",
+        "visible": true,
+        "order": 6,
+        "type": "list"
+      },
+      {
+        "id": "recovery",
+        "label": "Existing Safeguards / Recovery",
+        "visible": true,
+        "order": 7
+      },
+      {
+        "id": "comments",
+        "label": "STPA Notes",
+        "visible": true,
+        "order": 8
+      }
+    ]
+  },
+  "root": {
+    "id": "1",
+    "title": "Control the approach and landing of ACA759 so that the safety constraint is enforced: the aircraft descends toward and lands only on the cleared, unoccupied runway (SFO 28R) and maintains safe separation from aircraft, vehicles and non-runway surfaces",
+    "level": 0,
+    "children": [
+      {
+        "id": "1.1",
+        "title": "Build an adequate process model of the destination before departure (YYZ)",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.1.1",
+            "title": "Review flight release NOTAMs for SFO (RWY 10R/28L CLSD 2300-0800)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.1.2",
+            "title": "Re-assess relevance of destination NOTAMs after departure delay",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.1.3",
+            "title": "Assess crew alertness and fatigue risk before duty (reserve call-out, flight into circadian low)",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.2",
+        "title": "Prepare the descent and configure navigation guidance (before top of descent)",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.2.1",
+            "title": "Obtain and review ATIS Quebec via ACARS (incl. NOTAM 'RWYS 28L, 10R CLSD')",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.2.2",
+            "title": "Select RNAV 28R (FMS Bridge Visual) from FMS database",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.2.3",
+            "title": "PM: Manually tune ILS 28R (111.7) on MCDU RAD NAV page",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.2.4",
+            "title": "Select LS and check ILS identifier on PFDs",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.2.5",
+            "title": "PF: Review and verify all MCDU programming made by PM",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.3",
+        "title": "Conduct arrival, approach and threat briefing",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.3.1",
+            "title": "Brief approach procedure, expected runway lighting and visual aids",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.3.2",
+            "title": "Identify and brief threats and mitigations (NOTAMs, closed parallel runway, night, alertness)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.3.3",
+            "title": "Agree automation and descent mode strategy (managed vs open descent)",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.4",
+        "title": "Fly the arrival and initial approach",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.4.1",
+            "title": "Manage descent mode and meet altitude constraints",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.4.2",
+            "title": "Comply with ATC clearances (direct TRDOW, cleared FMS Bridge Visual, contact tower)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.4.3",
+            "title": "Obtain and read back landing clearance for runway 28R",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.4.4",
+            "title": "Configure aircraft for landing (gear down, flaps)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.4.5",
+            "title": "Disconnect autopilot and flight directors at or before F101D",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.5",
+        "title": "PF: Identify and align with the cleared runway (visual segment after F101D)",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.5.1",
+            "title": "Visually identify runway 28R environment (approach lights, edge/centreline lights, PAPI)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.5.2",
+            "title": "Turn 14 deg right at F101D and align with runway 28R centreline",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.5.3",
+            "title": "Cross-check lateral alignment against electronic guidance (LOC / LNAV / ND)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.5.4",
+            "title": "Detect and resolve conflicting visual cues (green centreline, yellow guard lights, aircraft lights, no runway markings)",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.6",
+        "title": "PM: Monitor the approach and support the PF",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.6.1",
+            "title": "Set missed approach altitude and heading",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.6.2",
+            "title": "Set runway heading bug (on PF request)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.6.3",
+            "title": "Monitor flight path against stabilised approach criteria (1000 ft / 500 ft gates)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.6.4",
+            "title": "Call out deviations and assertively voice concerns to PF",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.7",
+        "title": "Verify runway status with ATC when cues are ambiguous",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.7.1",
+            "title": "Query tower: confirm runway clear / cleared to land",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.7.2",
+            "title": "Integrate ATC response with own perception and re-evaluate alignment",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.8",
+        "title": "Decide on and execute go-around",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.8.1",
+            "title": "Recognise go-around criteria (not on centreline, outside touchdown zone, unresolved doubt)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.8.2",
+            "title": "PM: Call 'go-around'",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.8.3",
+            "title": "PF: Execute go-around (thrust TOGA, pitch up, climb)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.8.4",
+            "title": "Fly missed approach per ATC instructions and re-set up second approach (incl. ILS)",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.9",
+        "title": "SFO ATCT: Provide aerodrome control service that enforces runway/taxiway separation",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.9.1",
+            "title": "Decide on consolidation of positions (single-person midnight operation)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.9.2",
+            "title": "Set airfield lighting for closed parallel runway configuration",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.9.3",
+            "title": "Scan runways, radar and ASSC display for conflicts and aircraft alignment",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.9.4",
+            "title": "Respond to pilot queries and third-party transmissions",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.9.5",
+            "title": "Issue go-around instruction when misalignment/conflict is detected",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.10",
+        "title": "Crews on taxiway C: Detect and alert to an approaching aircraft misaligned with the taxiway",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.10.1",
+            "title": "Detect arriving aircraft lined up with taxiway C",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.10.2",
+            "title": "Transmit warning on tower frequency",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.10.3",
+            "title": "Illuminate own aircraft (landing/nose lights) to signal occupied surface",
+            "level": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.11",
+        "title": "Report the event and preserve safety data (feedback to higher-level controllers)",
+        "level": 1,
+        "children": [
+          {
+            "id": "1.11.1",
+            "title": "Flight crew: Report event to dispatch as soon as possible",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.11.2",
+            "title": "Flight crew: File Air Safety Report (ASR)",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.11.3",
+            "title": "Operator: Remove aircraft from service and preserve CVR/FDR data",
+            "level": 2,
+            "children": []
+          },
+          {
+            "id": "1.11.4",
+            "title": "ATC: File mandatory occurrence report with correct severity",
+            "level": 2,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "ttaRecords": [
+    {
+      "id": "r0",
+      "taskId": "1",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "Loss: collision between ACA759 and up to four occupied aircraft on taxiway C (approx. 1000 people at risk). Hazard: aircraft on final aligned with a non-runway / occupied surface (min. 60 ft agl, 10-20 ft vertical separation to PAL115).",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 0: Do 1.1 (preflight) then 1.2 > 1.3 before top of descent; do 1.4 > 1.5 with 1.6 in parallel; do 1.7 if visual cues are ambiguous; do 1.8 if go-around criteria met or doubt unresolved; 1.9 and 1.10 run concurrently (other controllers); do 1.11 after landing. STPA: controllers = PF, PM, ATCT controller, other crews, operator (dispatch/flight ops/safety dept), FAA/Transport Canada. Safety constraint: aircraft must not descend below a safe height unless aligned with the cleared runway.",
+      "controller": "All controllers",
+      "hazards": "H1, H2, H3"
+    },
+    {
+      "id": "r1.1",
+      "taskId": "1.1",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.1: Do 1.1.1 then 1.1.2 whenever schedule changes; 1.1.3 at call-out and report for duty.",
+      "controller": "Flight crew / Operator",
+      "hazards": ""
+    },
+    {
+      "id": "r1.1.1",
+      "taskId": "1.1.1",
+      "externalErrorMode": "Information not retained (NOTAM 'quick scan', closure not recalled)",
+      "recovery": "Second opportunity: NOTAM in ATIS Quebec (1.2.1); threat briefing (1.3.2)",
+      "consequence": "Crew expects two open parallel runways at SFO - flawed process model of airport configuration",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Interface",
+        "Procedures",
+        "Experience/Expectation"
+      ],
+      "comments": "27-page release; closure NOTAM on p.8, mid-list among many crane NOTAMs (serial position effect). Tablets did not allow highlighting. Report 1.1, 2.3.1, Fig.10. STPA: inadequate feedback/information to flight crew controller; links to A-18-24.",
+      "controller": "Flight crew / Operator",
+      "hazards": ""
+    },
+    {
+      "id": "r1.1.2",
+      "taskId": "1.1.2",
+      "externalErrorMode": "Check omitted (NOTAM relevance not re-evaluated after 49 min takeoff delay)",
+      "recovery": "ATIS and threat briefing",
+      "consequence": "Closure judged irrelevant because crew believed they would land before 2300",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Time pressure",
+        "Procedures"
+      ],
+      "comments": "Original ETA 2303, 3 min after closure. Report 2.2.1. STPA: process model not updated when context (time) changed.",
+      "controller": "Flight crew / Operator",
+      "hazards": ""
+    },
+    {
+      "id": "r1.1.3",
+      "taskId": "1.1.3",
+      "externalErrorMode": "Inadequate assessment (fatigue risk accepted / not mitigated)",
+      "recovery": "In-flight 'keep an eye on each other'; controlled rest not feasible",
+      "consequence": "Captain awake >19 h, FO >12 h; operating at 0256 body-clock time; increased susceptibility to expectation bias",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Fatigue",
+        "Organisational/Regulatory"
+      ],
+      "comments": "Reserve captain notified 1149 EDT, 7 h 51 min notice; compliant with Canadian rules, not with 14 CFR 117. Report 1.2, 2.3.3. STPA: higher-level controller (Transport Canada regulation, operator scheduling) - inadequate control; A-18-29.",
+      "controller": "Flight crew / Operator",
+      "hazards": ""
+    },
+    {
+      "id": "r1.2",
+      "taskId": "1.2",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.2: Do 1.2.1, then 1.2.2 > 1.2.3 > 1.2.4 (PM); then 1.2.5 (PF). All before top of descent.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.2.1",
+      "taskId": "1.2.1",
+      "externalErrorMode": "Information not obtained (closure text in ATIS not detected)",
+      "recovery": "Threat briefing; closed-runway 'X' marker on 28L",
+      "consequence": "Flawed process model persists into approach",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Interface",
+        "Fatigue"
+      ],
+      "comments": "ATIS printed as 14 continuous upper-case lines; closure split over lines 8-9. Received ~2321, low-workload phase. Report 2.2.1, 2.3.1, Fig.11. STPA: feedback channel design (ACARS presentation).",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.2.2",
+      "taskId": "1.2.2",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "Correct procedure selected; database lacked autotune frequency for this approach",
+      "humanErrorType": "-",
+      "psf": [
+        "Interface"
+      ],
+      "comments": "Only approach in AC A320 database requiring manual navaid tuning (database from United Airlines, no autotune frequency). Report 1.1 fn14. STPA: automation (FMS) controller design flaw; A-18-23.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.2.3",
+      "taskId": "1.2.3",
+      "externalErrorMode": "Omission (ILS frequency not entered)",
+      "recovery": "PF verification (1.2.5); PFD ident check (1.2.4)",
+      "consequence": "No localizer / extended centreline on PFD/ND - no independent lateral feedback during visual segment",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Procedures",
+        "Interface",
+        "Experience/Expectation"
+      ],
+      "comments": "Unusual step; instruction 'Tune the ILS 28R' embedded mid-paragraph on chart page 2 (low salience). FDR confirms no frequency entered. Report 2.2.2, Fig.9. STPA UCA: 'Tune ILS' not provided by PM.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.2.4",
+      "taskId": "1.2.4",
+      "externalErrorMode": "Check omitted (LS not selected, missing ident not noticed)",
+      "recovery": "PF verification",
+      "consequence": "Absence of ILS data on PFDs not detected",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Interface",
+        "Procedures"
+      ],
+      "comments": "Absence of information is hard to detect. AC procedure for this approach did not require LS selection. Report 1.1 fn15.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.2.5",
+      "taskId": "1.2.5",
+      "externalErrorMode": "Check omitted (PF did not verify RAD NAV page)",
+      "recovery": "None effective until second approach",
+      "consequence": "Error from 1.2.3 not trapped; redundancy of two-pilot cross-check lost",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Fatigue",
+        "Workload",
+        "Procedures"
+      ],
+      "comments": "SOP required PF review of all MCDU programming. Report 2.2.2. STPA: missing cross-check between controllers (PF-PM) - coordination flaw.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.3",
+      "taskId": "1.3",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.3: First item on pre-descent checklist. PM starts threat identification, PF ends; do 1.3.1 > 1.3.2 > 1.3.3.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.3.1",
+      "taskId": "1.3.1",
+      "externalErrorMode": "Incomplete action (expected lighting configuration not briefed)",
+      "recovery": "Visual cues on approach",
+      "consequence": "Crew not primed to notice absence of 28L lights or unusual surface lighting",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Procedures"
+      ],
+      "comments": "After the event AC amended briefing to include expected approach/runway lighting and visual aids (Appendix B).",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.3.2",
+      "taskId": "1.3.2",
+      "externalErrorMode": "Omission (runway 28L closure not identified as threat)",
+      "recovery": "In-flight cues; ATC",
+      "consequence": "Threat not proactively mitigated (top TEM level failed); information not made accessible for later recall",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Procedures",
+        "Fatigue",
+        "Training"
+      ],
+      "comments": "Briefed: night, traffic, busy airspace, terrain, alertness. Threat card listed NOTAMS and Lighting. Report 2.2.5.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.3.3",
+      "taskId": "1.3.3",
+      "externalErrorMode": "Communication omitted (descent mode not discussed)",
+      "recovery": "PM monitoring",
+      "consequence": "Diverging mental models of automation state between PF and PM; increased PM workload",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Communication",
+        "Workload"
+      ],
+      "comments": "FO perceived open descent and was uncomfortable; captain stated managed after catching up. Report 1.1, 2.2.3. STPA: inconsistent process models between controllers.",
+      "controller": "Flight crew (PM, PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4",
+      "taskId": "1.4",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.4: Do 1.4.1 continuously; 1.4.2 and 1.4.3 as ATC instructs; 1.4.4 per profile; 1.4.5 at or before F101D.",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4.1",
+      "taskId": "1.4.1",
+      "externalErrorMode": "Inappropriate mode (open descent after vectoring)",
+      "recovery": "Allowed until F101D",
+      "consequence": "PM attention absorbed by constraint monitoring and missed approach setup",
+      "humanErrorType": "-",
+      "psf": [
+        "Workload",
+        "Interface"
+      ],
+      "comments": "Allowed by procedure; most AC pilots would fly managed. Report 2.2.3.",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4.2",
+      "taskId": "1.4.2",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "Clearances complied with",
+      "humanErrorType": "-",
+      "psf": [],
+      "comments": "Cleared for approach 2346:30; tower contact 2351:07.",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4.3",
+      "taskId": "1.4.3",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "Landing clearance 28R received 2351:11 at 3500 ft",
+      "humanErrorType": "-",
+      "psf": [],
+      "comments": "Clearance correct; the crew's belief about which surface was 28R was wrong.",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4.4",
+      "taskId": "1.4.4",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "Gear down 2352:46",
+      "humanErrorType": "-",
+      "psf": [],
+      "comments": "",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.4.5",
+      "taskId": "1.4.5",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "AP off 2353:28 (1300 ft), FDs off 2354:02 (1200 ft) - aircraft now manually flown with only visual references",
+      "humanErrorType": "-",
+      "psf": [
+        "Procedures"
+      ],
+      "comments": "Procedure-compliant, but with no ILS tuned there was no electronic lateral feedback after this point.",
+      "controller": "Flight crew (PF)",
+      "hazards": ""
+    },
+    {
+      "id": "r1.5",
+      "taskId": "1.5",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.5: Do 1.5.1 > 1.5.2; then 1.5.3 continuously until touchdown; do 1.5.4 whenever cues conflict; if unresolved go to 1.7 or 1.8.",
+      "controller": "PF",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.5.1",
+      "taskId": "1.5.1",
+      "externalErrorMode": "Wrong identification (28R perceived as 28L, taxiway C perceived as 28R)",
+      "recovery": "Cross-check with guidance (1.5.3); PM monitoring; ATC",
+      "consequence": "Hazardous state: aircraft aligned with occupied taxiway C",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": [
+        "Experience/Expectation",
+        "Environment",
+        "Fatigue"
+      ],
+      "comments": "Expectation bias from previous SFO experience (never seen 28L dark); 28L lights off; construction light plants on 28L; aircraft lights on C in straight line; 28L 'X' marker not in field of view and 0.2 Hz flash. Report 2.3.1-2.3.2. STPA: flawed process model of PF; A-18-28.",
+      "controller": "PF",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.5.2",
+      "taskId": "1.5.2",
+      "externalErrorMode": "Right action on wrong object (aligned with taxiway C)",
+      "recovery": "Cross-check, PM, ATC, other crews",
+      "consequence": "UCA: 'Align with landing surface' provided on wrong surface; descent continued toward occupied taxiway",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": [
+        "Experience/Expectation",
+        "Environment"
+      ],
+      "comments": "At F101D, 2354:28, 1100 ft, 3.6 nm from seawall. PAPI for 28R (left side) still gave plausible glidepath, reinforcing belief.",
+      "controller": "PF",
+      "hazards": "H1, H2"
+    },
+    {
+      "id": "r1.5.3",
+      "taskId": "1.5.3",
+      "externalErrorMode": "Check not possible / omitted (no LOC tuned, LNAV not used as cross-check)",
+      "recovery": "-",
+      "consequence": "No independent, dissimilar feedback on lateral position",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Interface",
+        "Procedures"
+      ],
+      "comments": "Preceding DAL521 had same confusion and resolved it via LNAV guidance. No RAAS/SmartLanding fitted; simulation shows 'Caution Taxiway' at 235 ft, 0.43 nm. Report 1.1.1, 1.5.2, 2.3.4. STPA: missing feedback/sensor; A-18-25, A-18-26.",
+      "controller": "PF",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.5.4",
+      "taskId": "1.5.4",
+      "externalErrorMode": "Information misinterpreted (guard lights interpreted as aircraft on runway; green centreline not acted on)",
+      "recovery": "Query to ATC (1.7)",
+      "consequence": "Belief persisted despite contradicting cues",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": [
+        "Experience/Expectation",
+        "Fatigue",
+        "Environment"
+      ],
+      "comments": "Crew recalled green centreline lights. Absence of runway features (TDZ, edge lights) hard to detect. Fatigue reduces ability to adapt to new information. Report 2.3.2.1.",
+      "controller": "PF",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.6",
+      "taskId": "1.6",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.6: Do 1.6.1 after AP disconnect; 1.6.2 on PF request; 1.6.3 continuously; 1.6.4 whenever deviation or doubt is detected. Head-down tasks must not prevent 1.6.3 during visual segment.",
+      "controller": "PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.6.1",
+      "taskId": "1.6.1",
+      "externalErrorMode": "Action at inappropriate time (head-down during critical alignment)",
+      "recovery": "PF self-monitoring",
+      "consequence": "PM not monitoring when aircraft aligned with taxiway",
+      "humanErrorType": "-",
+      "psf": [
+        "Workload",
+        "Interface"
+      ],
+      "comments": "Appropriate given perceived open descent; info had to be read from chart. Set 2355:00. Report 2.2.3.",
+      "controller": "PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.6.2",
+      "taskId": "1.6.2",
+      "externalErrorMode": "Task delayed (difficulty finding runway heading on chart)",
+      "recovery": "-",
+      "consequence": "Prolonged head-down time after F101D",
+      "humanErrorType": "-",
+      "psf": [
+        "Interface",
+        "Communication",
+        "Workload"
+      ],
+      "comments": "Late PF request at F101D took FO by surprise; indicates insufficient preparation. Report 2.2.5.",
+      "controller": "PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.6.3",
+      "taskId": "1.6.3",
+      "externalErrorMode": "Monitoring omitted / too late",
+      "recovery": "ATC, other crews",
+      "consequence": "FO looked up only when asked to call tower; accepted alignment as correct",
+      "humanErrorType": "Lapse",
+      "psf": [
+        "Workload",
+        "Experience/Expectation",
+        "Fatigue"
+      ],
+      "comments": "FO expected captain to align with intended runway (trust/complacency). Stabilised approach criteria (lateral on centreline) could not be verified electronically. Report 2.2.3, 2.3.2.2.",
+      "controller": "PM",
+      "hazards": "H1, H3"
+    },
+    {
+      "id": "r1.6.4",
+      "taskId": "1.6.4",
+      "externalErrorMode": "Communication omitted (concern about descent mode not voiced; doubt about lights not escalated as go-around)",
+      "recovery": "-",
+      "consequence": "Weak cross-monitoring between PF and PM",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Communication",
+        "Training"
+      ],
+      "comments": "CRM competency: PM to communicate all ambiguities assertively. Crew had not yet received 'Understanding Gut Feel' (LIVE) training. Report 1.6.5, 2.2.5, 2.3.4.",
+      "controller": "PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.7",
+      "taskId": "1.7",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.7: Do 1.7.1 as soon as ambiguity is perceived; then 1.7.2. If doubt remains, do 1.8 without waiting.",
+      "controller": "Flight crew -> ATCT",
+      "hazards": ""
+    },
+    {
+      "id": "r1.7.1",
+      "taskId": "1.7.1",
+      "externalErrorMode": "Action too late (query delayed ~38 s by frequency congestion)",
+      "recovery": "Go-around",
+      "consequence": "Query made at 300 ft, 0.66 nm; ATC reply at 200 ft - little time left to reconcile",
+      "humanErrorType": "-",
+      "psf": [
+        "Communication",
+        "Environment"
+      ],
+      "comments": "Combined local/ground frequency busy for 61 s before query. Report 2.5.1. STPA: control loop delay in communication channel.",
+      "controller": "Flight crew -> ATCT",
+      "hazards": "H1, H2"
+    },
+    {
+      "id": "r1.7.2",
+      "taskId": "1.7.2",
+      "externalErrorMode": "Information misinterpreted ('no one on 28R' taken as confirmation of alignment)",
+      "recovery": "Cues near seawall; taxiway crew warnings",
+      "consequence": "Approach continued to 100 ft over UAL1",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": [
+        "Experience/Expectation",
+        "Fatigue",
+        "Communication"
+      ],
+      "comments": "Query asked about runway status, not about own alignment; ATC answer true but did not address the actual hazard. STPA: feedback that is correct but semantically mismatched with controller's need.",
+      "controller": "Flight crew -> ATCT",
+      "hazards": "H1"
+    },
+    {
+      "id": "r1.8",
+      "taskId": "1.8",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.8: If any criterion in 1.8.1 is met, do 1.8.2 and 1.8.3 immediately (early, especially in confusion - SAFO 17010); then 1.8.4.",
+      "controller": "PF / PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.8.1",
+      "taskId": "1.8.1",
+      "externalErrorMode": "Action too late (recognition only over airport surface)",
+      "recovery": "Last-moment go-around",
+      "consequence": "Minimal safety margins; overflight of UAL1 at 100 ft",
+      "humanErrorType": "Knowledge-based mistake",
+      "psf": [
+        "Experience/Expectation",
+        "Fatigue"
+      ],
+      "comments": "Triggering cues within 6 s (2355:59-2356:05): UAL1 transmissions, PAL115 lights, own landing lights showing aircraft. Report 2.3.2.2.",
+      "controller": "PF / PM",
+      "hazards": "H1, H2, H3"
+    },
+    {
+      "id": "r1.8.2",
+      "taskId": "1.8.2",
+      "externalErrorMode": "Action too late",
+      "recovery": "PF simultaneous initiation",
+      "consequence": "Callout coincided with PF action",
+      "humanErrorType": "-",
+      "psf": [
+        "Experience/Expectation"
+      ],
+      "comments": "FO called go-around because he could not resolve what he saw.",
+      "controller": "PF / PM",
+      "hazards": "H2"
+    },
+    {
+      "id": "r1.8.3",
+      "taskId": "1.8.3",
+      "externalErrorMode": "Action too late (TOGA at 89 ft, 0.11 nm beyond seawall)",
+      "recovery": "-",
+      "consequence": "Collision avoided; min. 60 ft agl over PAL115, 10-20 ft vertical separation",
+      "humanErrorType": "-",
+      "psf": [
+        "Fatigue"
+      ],
+      "comments": "Crew later believed go-around was at ~400 ft and did not see aircraft below - perception of severity distorted. Report 1.1, 2.2.4. STPA UCA: go-around provided too late.",
+      "controller": "PF / PM",
+      "hazards": "H2"
+    },
+    {
+      "id": "r1.8.4",
+      "taskId": "1.8.4",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "ILS tuned for second approach; uneventful landing 0011",
+      "humanErrorType": "-",
+      "psf": [],
+      "comments": "Shows that the control action (tune ILS) was feasible and effective once prompted.",
+      "controller": "PF / PM",
+      "hazards": ""
+    },
+    {
+      "id": "r1.9",
+      "taskId": "1.9",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.9: Do 1.9.1 based on traffic forecast; 1.9.2 when configuration changes; 1.9.3 continuously; 1.9.4 on any transmission; 1.9.5 immediately when conflict detected.",
+      "controller": "ATCT controller",
+      "hazards": ""
+    },
+    {
+      "id": "r1.9.1",
+      "taskId": "1.9.1",
+      "externalErrorMode": "Action too early (positions combined at 2349 while LUAW still in use)",
+      "recovery": "Recall second controller",
+      "consequence": "Frequency congestion; NCT not informed of single-person operation",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Procedures",
+        "Workload",
+        "Organisational/Regulatory"
+      ],
+      "comments": "SOP had no staffing rules 2200-0630; after event: no combining before 0015. Report 1.4.1, 2.5.1. STPA: ATC organisational controller.",
+      "controller": "ATCT controller",
+      "hazards": ""
+    },
+    {
+      "id": "r1.9.2",
+      "taskId": "1.9.2",
+      "externalErrorMode": "Inadequate setting (approach light intensity/SFL not adapted to closed parallel runway)",
+      "recovery": "Pilot request",
+      "consequence": "Weaker visual definition of landing runway 28R",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Procedures",
+        "Environment"
+      ],
+      "comments": "Lighting met regulations; DAL521 captain stated sequenced flashers would have defined the runway. After event: +1 step approach light intensity when adjacent arrival runway closed. Report 1.4.",
+      "controller": "ATCT controller",
+      "hazards": ""
+    },
+    {
+      "id": "r1.9.3",
+      "taskId": "1.9.3",
+      "externalErrorMode": "Detection not possible (misalignment not visible due to parallax; ASSC gave no alert)",
+      "recovery": "Third-party pilot transmissions",
+      "consequence": "Controller unaware of hazardous state until ~0.1 nm final",
+      "humanErrorType": "-",
+      "psf": [
+        "Interface",
+        "Environment"
+      ],
+      "comments": "ASSC safety logic not designed for taxiway arrivals; ACA759 data block dropped out for 12 s. Report 1.4.2, 2.5.2. STPA: missing sensor/feedback for ATC controller; A-18-27.",
+      "controller": "ATCT controller",
+      "hazards": "H1, H2"
+    },
+    {
+      "id": "r1.9.4",
+      "taskId": "1.9.4",
+      "externalErrorMode": "Information misinterpreted (unidentified 'where is that guy going?' seemed out of context)",
+      "recovery": "Second transmission 'he's on the taxiway'",
+      "consequence": "Few seconds delay in recognising conflict",
+      "humanErrorType": "-",
+      "psf": [
+        "Communication",
+        "Workload"
+      ],
+      "comments": "Controller had just scanned 28R twice and answered ACA759 correctly within 1 s. Report 2.2.4.",
+      "controller": "ATCT controller",
+      "hazards": ""
+    },
+    {
+      "id": "r1.9.5",
+      "taskId": "1.9.5",
+      "externalErrorMode": "Action too late (relative to need; appropriate once aware)",
+      "recovery": "Crew-initiated go-around",
+      "consequence": "Go-around instruction at 2356:09, after aircraft was already climbing",
+      "humanErrorType": "-",
+      "psf": [
+        "Interface"
+      ],
+      "comments": "NTSB: controller responded appropriately once aware. STPA UCA: 'Go around' provided too late due to missing feedback.",
+      "controller": "ATCT controller",
+      "hazards": "H1, H2"
+    },
+    {
+      "id": "r1.10",
+      "taskId": "1.10",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.10: Informal, unplanned control loop. Do 1.10.1; if misalignment detected do 1.10.2 and 1.10.3 in parallel.",
+      "controller": "Crews on taxiway C",
+      "hazards": ""
+    },
+    {
+      "id": "r1.10.1",
+      "taskId": "1.10.1",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "UAL1 saw ACA759 1-2 miles out, expected it to correct",
+      "humanErrorType": "-",
+      "psf": [
+        "Experience/Expectation"
+      ],
+      "comments": "Report 1.1.2.",
+      "controller": "Crews on taxiway C",
+      "hazards": ""
+    },
+    {
+      "id": "r1.10.2",
+      "taskId": "1.10.2",
+      "externalErrorMode": "Non-standard phraseology / no callsign",
+      "recovery": "Second transmission",
+      "consequence": "Warning reached controller but was initially not understood; ACA759 crew did not register it",
+      "humanErrorType": "-",
+      "psf": [
+        "Communication"
+      ],
+      "comments": "STPA: unofficial feedback path that turned out to be decisive.",
+      "controller": "Crews on taxiway C",
+      "hazards": "H1, H2"
+    },
+    {
+      "id": "r1.10.3",
+      "taskId": "1.10.3",
+      "externalErrorMode": "-",
+      "recovery": "-",
+      "consequence": "Illuminated taxiway and UAL1; likely one of the cues triggering go-around",
+      "humanErrorType": "-",
+      "psf": [],
+      "comments": "PAL115 and UAL863. Report 2.3.2.2.",
+      "controller": "Crews on taxiway C",
+      "hazards": ""
+    },
+    {
+      "id": "r1.11",
+      "taskId": "1.11",
+      "externalErrorMode": "",
+      "recovery": "",
+      "consequence": "",
+      "humanErrorType": "",
+      "psf": [],
+      "comments": "Plan 1.11: Do 1.11.1 immediately after landing (ACARS possible); 1.11.2 when time permits; operator does 1.11.3 on notification; ATC does 1.11.4 promptly.",
+      "controller": "Flight crew / Operator / ATC",
+      "hazards": ""
+    },
+    {
+      "id": "r1.11.1",
+      "taskId": "1.11.1",
+      "externalErrorMode": "Action too late (~16 h) and severity understated ('wrong runway')",
+      "recovery": "TSB e-mail to operator on 9 July",
+      "consequence": "Operator unaware of severity; crew flew return sector; aircraft kept in service",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Fatigue",
+        "Procedures"
+      ],
+      "comments": "'As soon as possible' was undefined. Report 1.6.4, 2.4. STPA: feedback to operator (higher-level controller) delayed and degraded.",
+      "controller": "Flight crew / Operator / ATC",
+      "hazards": ""
+    },
+    {
+      "id": "r1.11.2",
+      "taskId": "1.11.2",
+      "externalErrorMode": "Action delayed (ASR stuck on tablet without Wi-Fi)",
+      "recovery": "-",
+      "consequence": "Safety department received report 10-11 July",
+      "humanErrorType": "-",
+      "psf": [
+        "Interface"
+      ],
+      "comments": "Report 1.6.4.",
+      "controller": "Flight crew / Operator / ATC",
+      "hazards": ""
+    },
+    {
+      "id": "r1.11.3",
+      "taskId": "1.11.3",
+      "externalErrorMode": "Omission (aircraft not removed from service; safety dept not consulted)",
+      "recovery": "-",
+      "consequence": "CVR overwritten (2 h recorder); evidence lost; ~40 h further flying",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Organisational/Regulatory",
+        "Procedures"
+      ],
+      "comments": "Flight ops decided without safety department. Report 1.6.4, 2.4. STPA: organisational control loop.",
+      "controller": "Flight crew / Operator / ATC",
+      "hazards": ""
+    },
+    {
+      "id": "r1.11.4",
+      "taskId": "1.11.4",
+      "externalErrorMode": "Severity understated (reported as go-around, not flagged significant)",
+      "recovery": "-",
+      "consequence": "Regulator/operator notification delayed",
+      "humanErrorType": "Rule-based mistake",
+      "psf": [
+        "Workload",
+        "Procedures"
+      ],
+      "comments": "MOR entered ~0125; see Member Weener statement. Report 1.4.1.",
+      "controller": "Flight crew / Operator / ATC",
+      "hazards": ""
+    }
+  ]
+}
