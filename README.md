@@ -50,7 +50,7 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 
 | Control | What it does |
 | --- | --- |
-| Columns | Show/hide columns, **Edit** a column's name and description, **+ Column** to add a custom column, **Reset** built-in columns (custom ones stay) |
+| Columns | Show/hide columns, **Edit** a column's name and description, **+ Column** to add a column, **Reset** to restore the HEI columns (other columns stay) |
 | Filter | Reserved (not yet wired) |
 | Export CSV | Download `hta-tta.csv` for Excel / SmartArt |
 | Add row | Extra HEI row for the selected task |
@@ -60,8 +60,9 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 The columns belong to the analysis and are saved in `meta.columns` (see [design principles 1.7](https://github.com/larswpettersson/hfa-ds/blob/main/docs/design-principles.md) in hfa-ds).
 
 - **Click a column header** (or press Enter on a focused header) to edit its name and **description**. The description says what the column means and how to fill it in; it shows as the header's tooltip and will be used by the AI support.
-- **Columns → + Column** adds a custom column. Its id is made from the name (e.g. *Control and feedback* → `controlAndFeedback`), and each TTA row stores its value under that id. Custom columns can be deleted (with their values); built-in columns can only be hidden.
-- Built-in columns have a default description. A built-in column that is relabelled in the file (e.g. *External Error Mode* → *Unsafe Control Action (UCA)*) does not keep it.
+- **Columns → + Column** adds a column. Its id is made from the name (e.g. *Control and feedback* → `controlAndFeedback`), and each TTA row stores its value under that id.
+- **All columns are equal.** A new analysis, or a file without `meta.columns`, starts with the HEI columns (External Error Mode, Recovery, Consequence, Human Error Type, PSFs, Comments), but any of them can be renamed or deleted (with its values). Only **Task Step**, the link to the HTA task, is always there. **Reset** restores the HEI columns and keeps the others.
+- A column has a `type`: `text`, `list` (comma-separated, stored as an array) or `select` (with `options`). The HEI columns have a default description, which a renamed HEI column does not keep.
 - Every change can be undone (Ctrl/⌘+Z) and is included in **Export**.
 
 ### Keyboard
