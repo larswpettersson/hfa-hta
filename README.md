@@ -63,6 +63,7 @@ The columns belong to the analysis and are saved in `meta.columns` (see [design 
 - **Columns… → + Column…** adds a column. Its id is made from the name (e.g. *Control and feedback* → `controlAndFeedback`), and each TTA row stores its value under that id.
 - **All columns are equal.** A new analysis, or a file without `meta.columns`, starts with the HEI columns (External Error Mode, Recovery, Consequence, Human Error Type, PSFs, Comments), but any of them can be renamed or deleted (with its values). Only **Task Step**, the link to the HTA task, is always there. **Reset** restores the HEI columns and keeps the others.
 - A column has a `type`: `text`, `list` (comma-separated, stored as an array) or `select` (with `options`). The HEI columns have a default description, which a renamed HEI column does not keep.
+- **✕ at the end of a row** deletes that TTA row. A task's last row is cleared instead, since every task keeps at least one row. There is no question: Ctrl/⌘+Z undoes it.
 - Every change can be undone (Ctrl/⌘+Z) and is included in **Export**.
 
 ### Keyboard

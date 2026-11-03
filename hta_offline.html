@@ -513,6 +513,21 @@
     .column-picker .col-edit:hover,
     .column-picker .col-edit:focus-visible { border-color: var(--color-foreground-subtle); color: var(--color-foreground); }
 
+    .tta-table th.tta-del-col,
+    .tta-table td.tta-del-cell { width: 1%; padding: 4px; text-align: center; vertical-align: middle; }
+    .tta-row-del {
+      font: inherit;
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px 6px;
+      color: var(--color-foreground-subtle);
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tta-row-del:hover { color: var(--color-foreground); border-color: var(--color-foreground-subtle); }
+    .tta-row-del:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; color: var(--color-foreground); }
     .tta-table th.tta-col-head { cursor: pointer; }
     .tta-table th.tta-col-head:hover { background: color-mix(in srgb, var(--color-foreground) 12%, var(--color-background-sunken)); }
     .tta-table th.tta-col-head:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
@@ -694,6 +709,7 @@
       <h3>TTA columns</h3>
       <dl>
         <dt>Click a header</dt><dd>Edit the column's name and description (or Enter on a focused header)</dd>
+        <dt>✕ at the end of a row</dt><dd>Delete the TTA row (a task's last row is cleared instead); Ctrl/⌘+Z undoes it</dd>
         <dt>Columns… → + Column…</dt><dd>Add a column. Any column except Task Step can be deleted; Reset restores the HEI columns</dd>
       </dl>
 
@@ -1730,9 +1746,15 @@
       });
       trh.appendChild(th);
     });
+    const delHead = document.createElement("th");
+    delHead.className = "tta-del-col";
+    delHead.setAttribute("aria-label", "Delete row");
+    trh.appendChild(delHead);
     ttaThead.appendChild(trh);
 
     ttaTbody.innerHTML = "";
+    const rowsPerTask = new Map();
+    (state.ttaRecords || []).forEach((r) => rowsPerTask.set(r.taskId, (rowsPerTask.get(r.taskId) || 0) + 1));
     orderedTtaRows().forEach((rec) => {
       const tr = document.createElement("tr");
       tr.dataset.recordId = rec.id;
@@ -1741,7 +1763,7 @@
         tr.classList.add("is-selected");
       }
       tr.addEventListener("click", (e) => {
-        if (e.target.closest("[contenteditable], select")) return;
+        if (e.target.closest("[contenteditable], select, button")) return;
         selectTask(rec.taskId, { skipTextFocus: true });
         centerTaskInViewport(rec.taskId);
       });
@@ -1804,10 +1826,51 @@
         }
         tr.appendChild(td);
       });
+      tr.appendChild(rowDeleteCell(rec, rowsPerTask.get(rec.taskId) > 1));
       ttaTbody.appendChild(tr);
     });
 
     renderColumnPicker();
+  }
+
+  /** ✕ at the end of a row (design principles 4.2): deletes the row, or clears it when it is the task's only row,
+      since every task keeps at least one TTA row. No question asked: Ctrl/⌘+Z undoes it. */
+  function rowDeleteCell(rec, canDelete) {
+    const td = document.createElement("td");
+    td.className = "tta-del-cell";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tta-row-del";
+    btn.textContent = "✕";
+    const task = taskRefFor(rec.taskId);
+    btn.title = canDelete
+      ? `Delete this row of ${task}`
+      : `Clear this row (${task} keeps at least one row)`;
+    btn.setAttribute("aria-label", canDelete ? `Delete row of ${task}` : `Clear row of ${task}`);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteTtaRow(rec.id);
+    });
+    td.appendChild(btn);
+    return td;
+  }
+
+  function deleteTtaRow(recordId) {
+    const rec = (state.ttaRecords || []).find((r) => r.id === recordId);
+    if (!rec) return;
+    const task = taskRefFor(rec.taskId);
+    const others = state.ttaRecords.filter((r) => r.taskId === rec.taskId && r.id !== recordId).length;
+    commit((s) => {
+      if (others) {
+        s.ttaRecords = s.ttaRecords.filter((r) => r.id !== recordId);
+        return;
+      }
+      const row = s.ttaRecords.find((r) => r.id === recordId);
+      (s.meta.columns || []).forEach((c) => {
+        if (c.id !== "taskStep") row[c.id] = columnValue(c, "");
+      });
+    });
+    showStatus(`${others ? "Row deleted" : "Row cleared"} (${task}). Ctrl/⌘+Z undoes it.`, "success");
   }
 
   function renderColumnPicker() {

@@ -513,6 +513,21 @@
     .column-picker .col-edit:hover,
     .column-picker .col-edit:focus-visible { border-color: var(--color-foreground-subtle); color: var(--color-foreground); }
 
+    .tta-table th.tta-del-col,
+    .tta-table td.tta-del-cell { width: 1%; padding: 4px; text-align: center; vertical-align: middle; }
+    .tta-row-del {
+      font: inherit;
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px 6px;
+      color: var(--color-foreground-subtle);
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tta-row-del:hover { color: var(--color-foreground); border-color: var(--color-foreground-subtle); }
+    .tta-row-del:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; color: var(--color-foreground); }
     .tta-table th.tta-col-head { cursor: pointer; }
     .tta-table th.tta-col-head:hover { background: color-mix(in srgb, var(--color-foreground) 12%, var(--color-background-sunken)); }
     .tta-table th.tta-col-head:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
@@ -694,6 +709,7 @@
       <h3>TTA columns</h3>
       <dl>
         <dt>Click a header</dt><dd>Edit the column's name and description (or Enter on a focused header)</dd>
+        <dt>✕ at the end of a row</dt><dd>Delete the TTA row (a task's last row is cleared instead); Ctrl/⌘+Z undoes it</dd>
         <dt>Columns… → + Column…</dt><dd>Add a column. Any column except Task Step can be deleted; Reset restores the HEI columns</dd>
       </dl>
 
