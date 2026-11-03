@@ -31,7 +31,7 @@ Selecting a task in HTA highlights matching TTA rows (and the reverse). Every HT
 5. Fill HEI cells in the TTA table; use **Add row** for extra HEI rows on the selected task.
 6. **Export** saves full state as JSON; **Export CSV** (TTA toolbar) saves Excel/SmartArt-friendly CSV.
 
-Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — use top-bar **Import**.
+Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — use top-bar **Import…**.
 
 ### Toolbar
 
@@ -39,7 +39,7 @@ Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — 
 | --- | --- |
 | Light / Dark | Theme |
 | Export | Download `hta-tta.json` (HTA tree + all TTA records) |
-| Import | Load a versioned JSON file |
+| Import… | Load a versioned JSON file |
 | + Child (**C**) | Add child under selected task |
 | + Sibling (**S**) | Add sibling after selected task |
 | + Duplicate (**D**) | Duplicate selected task (subtree + TTA) |
@@ -50,10 +50,21 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 
 | Control | What it does |
 | --- | --- |
-| Columns | Show/hide HEI columns (prefs stored in `localStorage`) |
+| Columns… | Show/hide columns, **Edit…** a column's name and description, **+ Column…** to add a column, **Reset** to restore the HEI columns (other columns stay) |
 | Filter | Reserved (not yet wired) |
 | Export CSV | Download `hta-tta.csv` for Excel / SmartArt |
 | Add row | Extra HEI row for the selected task |
+
+### TTA columns
+
+The columns belong to the analysis and are saved in `meta.columns` (see [design principles 1.7](https://github.com/larswpettersson/hfa-ds/blob/main/docs/design-principles.md) in hfa-ds).
+
+- **Click a column header** (or press Enter on a focused header) to edit its name and **description**. The description says what the column means and how to fill it in; it shows as the header's tooltip and will be used by the AI support.
+- **Columns… → + Column…** adds a column. Its id is made from the name (e.g. *Control and feedback* → `controlAndFeedback`), and each TTA row stores its value under that id.
+- **All columns are equal.** A new analysis, or a file without `meta.columns`, starts with the HEI columns (External Error Mode, Recovery, Consequence, Human Error Type, PSFs, Comments), but any of them can be renamed or deleted (with its values). Only **Task Step**, the link to the HTA task, is always there. **Reset** restores the HEI columns and keeps the others.
+- A column has a `type`: `text`, `list` (comma-separated, stored as an array) or `select` (with `options`). The HEI columns have a default description, which a renamed HEI column does not keep.
+- **✕ at the end of a row** deletes that TTA row. A task's last row is cleared instead, since every task keeps at least one row. There is no question: Ctrl/⌘+Z undoes it.
+- Every change can be undone (Ctrl/⌘+Z) and is included in **Export**.
 
 ### Keyboard
 
@@ -99,7 +110,10 @@ Version **2** includes `ttaRecords` and column meta:
   "meta": {
     "theme": "light",
     "columns": [
-      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0 }
+      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0,
+        "description": "The HTA task this row analyses (id and title)." },
+      { "id": "controlAndFeedback", "label": "Control and feedback", "visible": true, "order": 7,
+        "type": "text", "description": "Control actions and feedback for the task." }
     ]
   },
   "root": {
@@ -119,7 +133,8 @@ Version **2** includes `ttaRecords` and column meta:
       "consequence": "",
       "humanErrorType": "",
       "psf": [],
-      "comments": ""
+      "comments": "",
+      "controlAndFeedback": ""
     }
   ]
 }
