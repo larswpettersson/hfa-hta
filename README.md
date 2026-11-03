@@ -62,10 +62,10 @@ Drag the vertical gutter between HTA and TTA to resize panels (saved in `localSt
 | **Space** + drag | Pan the HTA canvas (hand tool) |
 | **⌘Z** / **Ctrl+Z** | Undo |
 | **⌘⇧Z** / **Ctrl+Shift+Z** (or **Ctrl+Y**) | Redo |
-| **↑** | Hover: move to parent (e.g. 1.1.2 → 1.1 → root). Selected: reorder among siblings |
-| **↓** | Hover: next task in tree order. Selected: reorder among siblings |
-| **←** | Outdent selected task |
-| **→** | Indent selected task under previous sibling |
+| **↑** | Hover: move to parent (e.g. 1.1.2 → 1.1 → root). Selected: outdent (move up a level) |
+| **↓** | Hover: next task in tree order. Selected: indent under previous sibling (move down a level) |
+| **←** | Hover: previous sibling. Selected: move earlier among siblings |
+| **→** | Hover: next sibling. Selected: move later among siblings |
 | **C** / **S** / **D** | Child / Sibling / Duplicate |
 | **Delete** / **Backspace** | Delete selected task (not root) |
 | **Enter** | Start / apply description edit |
