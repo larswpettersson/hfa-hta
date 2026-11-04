@@ -6,7 +6,7 @@ Tools for creating and visualizing Hierarchical Task Analysis (HTA) diagrams wit
 
 ## Offline use
 
-The editor also runs fully offline. [`hta_offline.html`](https://larswpettersson.github.io/hfa-hta/hta_offline.html) is a single self-contained HTML file (script inlined, no network needed). **[Download hta_offline.html](https://larswpettersson.github.io/hfa-hta/hta_offline.html)** (right-click → *Save link as…*), then open the saved file in any modern browser. **Load…** and **Save…** use local file pickers and downloads; preferences are kept in `localStorage`.
+The editor also runs fully offline. [`hta_offline.html`](https://larswpettersson.github.io/hfa-hta/hta_offline.html) is a single self-contained HTML file (script inlined, no network needed). **[Download hta_offline.html](https://larswpettersson.github.io/hfa-hta/hta_offline.html)** (right-click → *Save link as…*), then open the saved file in any modern browser. **Open…** and **Save** use a local file picker and a download; preferences are kept in `localStorage`.
 
 
 ## AI analysis
@@ -45,15 +45,16 @@ Selecting a task in HTA highlights matching TTA rows (and the reverse). Every HT
 5. Fill HEI cells in the TTA table; use **Add row** for extra HEI rows on the selected task.
 6. **Export** saves full state as JSON; **Export CSV** (TTA toolbar) saves Excel/SmartArt-friendly CSV.
 
-Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — use top-bar **Load…**.
+Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — use top-bar **Open…**.
 
 ### Toolbar
 
 | Control | What it does |
 | --- | --- |
 | Light / Dark | Theme |
-| Load… | Load an analysis from a versioned JSON file |
-| Save… | Save the analysis as `hta-tta.json` (HTA tree, TTA columns and all TTA records) |
+| New | Replace the analysis with a small, generic example that uses the whole structure (asks first; Ctrl/⌘+Z undoes it; clears the AI conversation) |
+| Open… | Open an analysis (versioned JSON file); asks first if there are unsaved changes (Save, Don't save, Cancel) |
+| Save | Save the analysis as `hta-tta.json` (HTA tree, TTA columns and all TTA records) |
 | + Child (**C**) | Add child under selected task |
 | + Sibling (**S**) | Add sibling after selected task |
 | + Duplicate (**D**) | Duplicate selected task (subtree + TTA) |
@@ -78,7 +79,7 @@ The columns belong to the analysis and are saved in `meta.columns` (see [design 
 - **All columns are equal.** A new analysis, or a file without `meta.columns`, starts with the HEI columns (External Error Mode, Recovery, Consequence, Human Error Type, PSFs, Comments), but any of them can be renamed or deleted (with its values). Only **Task Step**, the link to the HTA task, is always there. **Reset** restores the HEI columns and keeps the others.
 - A column has a `type`: `text`, `list` (comma-separated, stored as an array) or `select` (with `options`). The HEI columns have a default description, which a renamed HEI column does not keep.
 - **✕ at the end of a row** deletes that TTA row. A task's last row is cleared instead, since every task keeps at least one row. There is no question: Ctrl/⌘+Z undoes it.
-- Every change can be undone (Ctrl/⌘+Z) and is included in **Save…**.
+- Every change can be undone (Ctrl/⌘+Z) and is included in **Save**.
 
 ### Keyboard
 
@@ -115,7 +116,7 @@ TTA **Export CSV** writes UTF-8 CSV (BOM) with columns:
 
 Open in Excel, or copy the **Outline** column into Word/PowerPoint as a multilevel list and convert to SmartArt.
 
-### JSON schema (Load… / Save…)
+### JSON schema (Open… / Save)
 
 Version **2** includes `ttaRecords` and column meta:
 

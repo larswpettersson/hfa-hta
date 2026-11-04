@@ -123,6 +123,9 @@
     /* The global margin reset removes the browser's centring of modal dialogs. */
     .help-dialog { margin: auto; }
     .help-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+    .confirm-dialog { width: min(440px, calc(100vw - 32px)); font-size: 14px; }
+    .confirm-dialog p { margin: 0 0 4px; color: var(--color-foreground); }
+    .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
     .help-dialog h2 { margin: 0 0 12px; font-size: 16px; }
     .help-dialog h3 { margin: 14px 0 4px; font-size: 13px; }
     .help-dialog dl {
@@ -604,8 +607,9 @@
         <button type="button" class="action-btn" data-action="setThemeDark" title="Dark mode">
           Dark
         </button>
-        <button type="button" class="action-btn" data-action="importState" title="Load an analysis from a JSON file">Load…</button>
-        <button type="button" class="action-btn" data-action="exportState" title="Save the analysis (HTA + TTA) as a JSON file">Save…</button>
+        <button type="button" class="action-btn" data-action="newAnalysis" title="Replace the analysis with a small example that shows the whole structure">New</button>
+        <button type="button" class="action-btn" data-action="importState" title="Open an analysis (JSON file)">Open…</button>
+        <button type="button" class="action-btn" data-action="exportState" title="Save the analysis (HTA + TTA) as a JSON file">Save</button>
         <button type="button" class="action-btn" data-action="addChild" data-shortcut="c" title="Add child (C)">
           + <span class="btn-label"><span class="ul">C</span>hild</span>
         </button>
@@ -1070,7 +1074,7 @@
   function formatImportValidationMessage(errors, warnings) {
     const parts = [];
     if (errors.length) {
-      parts.push(`Cannot load the file (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
+      parts.push(`Cannot open the file (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
       errors.forEach((e, i) => {
         parts.push(`${i + 1}. [${e.path}] ${e.message}`);
         if (e.fix) parts.push(`   Fix: ${e.fix}`);
@@ -2172,17 +2176,18 @@
     if (errors.length) {
       const msg = formatImportValidationMessage(errors, warnings);
       window.alert(msg);
-      showStatus("File not loaded", "error");
+      showStatus("File not opened", "error");
       return false;
     }
     if (warnings.length) {
       const ok = window.confirm(
-        `${formatImportValidationMessage([], warnings)}\n\nLoad anyway?`
+        `${formatImportValidationMessage([], warnings)}\n\nOpen anyway?`
       );
       if (!ok) return false;
     }
     applyState(normalized);
-    showStatus("Analysis loaded", "success");
+    markSaved();
+    showStatus("Analysis opened", "success");
     return true;
   }
 
@@ -2530,6 +2535,7 @@
     a.download = "hta-tta.json";
     a.click();
     URL.revokeObjectURL(url);
+    markSaved();
     showStatus("Analysis saved", "success");
   }
 
@@ -2609,8 +2615,115 @@
     showStatus("Exported TTA CSV (Excel / SmartArt Outline)", "success");
   }
 
-  function importStateFromFile() {
+  /** Open… asks first when there are unsaved changes (design principles 4.4). */
+  async function importStateFromFile() {
+    if (hasUnsavedChanges() && !(await askAboutUnsaved("Opening a file replaces the analysis."))) return;
     importFileInput?.click();
+  }
+
+  // ---------- Unsaved changes and New (design principles 4.3, 4.4) ----------
+
+  let savedFingerprint = null;
+  const fingerprint = (s = state) =>
+    JSON.stringify({ root: s?.root, ttaRecords: s?.ttaRecords, columns: s?.meta?.columns });
+  /** The analysis as it was when it was last opened, saved or created counts as saved. */
+  function markSaved() {
+    savedFingerprint = fingerprint();
+  }
+  function hasUnsavedChanges() {
+    return !!state && fingerprint() !== savedFingerprint;
+  }
+
+  /** A small modal with the given buttons; resolves to the value of the button pressed ("" on Esc). */
+  function choose({ title, message, buttons }) {
+    return new Promise((resolve) => {
+      const dlg = document.createElement("dialog");
+      dlg.className = "help-dialog confirm-dialog";
+      const h = document.createElement("h2");
+      h.textContent = title;
+      const p = document.createElement("p");
+      p.textContent = message;
+      const row = document.createElement("div");
+      row.className = "confirm-actions";
+      buttons.forEach(([value, label]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "action-btn";
+        b.value = value;
+        b.textContent = label;
+        b.addEventListener("click", () => dlg.close(value));
+        row.appendChild(b);
+      });
+      dlg.append(h, p, row);
+      dlg.addEventListener("keydown", (e) => e.stopPropagation());
+      dlg.addEventListener("close", () => {
+        resolve(dlg.returnValue || "");
+        dlg.remove();
+      });
+      document.body.appendChild(dlg);
+      dlg.showModal();
+      row.lastElementChild?.focus();
+    });
+  }
+
+  /** Unsaved changes: Save (then go on), Don't save (go on) or Cancel. Resolves true to go on. */
+  async function askAboutUnsaved(what) {
+    const answer = await choose({
+      title: "Unsaved changes",
+      message: `The analysis has changes that are not saved. ${what}`,
+      buttons: [["cancel", "Cancel"], ["discard", "Don't save"], ["save", "Save"]],
+    });
+    if (answer === "save") exportStateToFile();
+    return answer === "save" || answer === "discard";
+  }
+
+  /** A minimal, generic analysis that uses the whole structure: goal, sub-tasks, operations, the HEI columns
+      with their descriptions, one filled-in row and empty rows for the other tasks. */
+  function exampleAnalysis() {
+    return {
+      columns: defaultColumns(),
+      root: {
+        id: "1", title: "Reach the overall goal",
+        children: [
+          { id: "1.1", title: "Prepare", children: [
+            { id: "1.1.1", title: "Check the conditions", children: [] },
+            { id: "1.1.2", title: "Set up the equipment", children: [] },
+          ] },
+          { id: "1.2", title: "Carry out the task", children: [] },
+        ],
+      },
+      ttaRecords: [
+        { id: "r1", taskId: "1.1.1", externalErrorMode: "Omission", recovery: "Noticed at the next check (1.2)",
+          consequence: "The task starts under the wrong conditions", humanErrorType: "Lapse", psf: ["Time pressure"],
+          comments: "Example row: replace it with your own analysis." },
+      ],
+    };
+  }
+
+  /** New: replaces the analysis with the example after asking; Ctrl/⌘+Z undoes it. Clears the AI conversation. */
+  async function newAnalysis() {
+    if (hasUnsavedChanges()) {
+      if (!(await askAboutUnsaved("New replaces the analysis with a small example."))) return;
+    } else {
+      const answer = await choose({
+        title: "New analysis",
+        message: "Replace the analysis with a small example that shows the whole structure? Ctrl/⌘+Z undoes it.",
+        buttons: [["cancel", "Cancel"], ["new", "New"]],
+      });
+      if (answer !== "new") return;
+    }
+    const ex = exampleAnalysis();
+    ui.selectedTaskId = null;
+    commit((s) => {
+      s.root = cloneNode(ex.root);
+      s.meta.columns = ex.columns;
+      s.ttaRecords = normalizeTtaRecords(ex.ttaRecords, ex.columns);
+      reassignIdsAndRemapTta(s);
+    });
+    persistColumns();
+    markSaved();
+    window.HTAAssist?.clear?.();
+    showStatus("New analysis: a small example. Ctrl/⌘+Z undoes it.", "success");
   }
 
   // ---------- Actions / keyboard ----------
@@ -2621,6 +2734,7 @@
     exportState: () => exportStateToFile(),
     exportTtaCsv: () => exportTtaCsv(),
     importState: () => importStateFromFile(),
+    newAnalysis: () => newAnalysis(),
     addChild: () => addChildTask(),
     addSibling: () => addSiblingTask(),
     duplicateTask: () => duplicateTask(),
@@ -2666,8 +2780,8 @@
       const raw = JSON.parse(text);
       loadState(raw);
     } catch (err) {
-      window.alert(`Could not load the file: ${err.message}`);
-      showStatus("File not loaded", "error");
+      window.alert(`Could not open the file: ${err.message}`);
+      showStatus("File not opened", "error");
     }
   });
 
@@ -3079,12 +3193,14 @@
   render(state);
   updateToolbarEnabled();
   resetStateHistory();
+  markSaved();
 
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
     replaceState,
     getSelectedTaskId: () => ui.selectedTaskId,
+    hasUnsavedChanges,
     loadState,
     parseHierarchy,
     treeToIndentedText,
@@ -3952,7 +4068,9 @@
       const t = $.prompt.value; $.prompt.value = ""; send(t);
     });
     $.prompt.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) $.chat.requestSubmit(); });
-    $.clear.addEventListener("click", () => { if (busy) busy.abort(); history = []; transcript.length = 0; $.log.replaceChildren(); setStatus(""); updateToBottom(); });
+    /** Clears the conversation; the tools also call it on New, since earlier turns concern the old analysis. */
+    function clearConversation() { if (busy) busy.abort(); history = []; transcript.length = 0; $.log.replaceChildren(); setStatus(""); updateToBottom(); }
+    $.clear.addEventListener("click", clearConversation);
     $.saveLog.addEventListener("click", () => {
       const md = [`# ${cfg.title}`, "", `_Exported ${new Date().toISOString()} · ${providerLabel()}_`, "",
         "## Analysis", "", "```json", JSON.stringify(cfg.getContext(), null, 2), "```", "",
@@ -3967,7 +4085,7 @@
     if (store.get(prefix + "ai-open")) setOpen(true);
     refreshModels();
 
-    return { open: () => setOpen(true), close: () => setOpen(false), send, get settings() { return settings; } };
+    return { open: () => setOpen(true), close: () => setOpen(false), send, clear: clearConversation, get settings() { return settings; } };
   }
 
   window.HFAAssist = { mount, renderMarkdown, CLAUDE_MODELS };
