@@ -274,7 +274,7 @@
     if (!s || typeof s !== "object") {
       errors.push({
         path: "$",
-        message: "Import must be a JSON object.",
+        message: "The file must contain a JSON object.",
         fix: 'Provide { "version": 1, "meta": { "theme": "light" }, "root": { "id": "1", "title": "...", "children": [] } }.',
       });
       return { errors, warnings };
@@ -331,7 +331,7 @@
   function formatImportValidationMessage(errors, warnings) {
     const parts = [];
     if (errors.length) {
-      parts.push(`Import blocked (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
+      parts.push(`Cannot load the file (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
       errors.forEach((e, i) => {
         parts.push(`${i + 1}. [${e.path}] ${e.message}`);
         if (e.fix) parts.push(`   Fix: ${e.fix}`);
@@ -1433,17 +1433,17 @@
     if (errors.length) {
       const msg = formatImportValidationMessage(errors, warnings);
       window.alert(msg);
-      showStatus("Import blocked", "error");
+      showStatus("File not loaded", "error");
       return false;
     }
     if (warnings.length) {
       const ok = window.confirm(
-        `${formatImportValidationMessage([], warnings)}\n\nImport anyway?`
+        `${formatImportValidationMessage([], warnings)}\n\nLoad anyway?`
       );
       if (!ok) return false;
     }
     applyState(normalized);
-    showStatus("Hierarchy imported", "success");
+    showStatus("Analysis loaded", "success");
     return true;
   }
 
@@ -1791,7 +1791,7 @@
     a.download = "hta-tta.json";
     a.click();
     URL.revokeObjectURL(url);
-    showStatus("Exported HTA+TTA JSON", "success");
+    showStatus("Analysis saved", "success");
   }
 
   function csvEscape(value) {
@@ -1927,8 +1927,8 @@
       const raw = JSON.parse(text);
       loadState(raw);
     } catch (err) {
-      window.alert(`Import failed: ${err.message}`);
-      showStatus("Import failed", "error");
+      window.alert(`Could not load the file: ${err.message}`);
+      showStatus("File not loaded", "error");
     }
   });
 
