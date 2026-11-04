@@ -52,7 +52,8 @@ Sample data: [`fixtures/hta-tta-sample.json`](fixtures/hta-tta-sample.json) — 
 | Control | What it does |
 | --- | --- |
 | Light / Dark | Theme |
-| Open… | Open an analysis (versioned JSON file) |
+| New | Replace the analysis with a small, generic example that uses the whole structure (asks first; Ctrl/⌘+Z undoes it; clears the AI conversation) |
+| Open… | Open an analysis (versioned JSON file); asks first if there are unsaved changes (Save, Don't save, Cancel) |
 | Save | Save the analysis as `hta-tta.json` (HTA tree, TTA columns and all TTA records) |
 | + Child (**C**) | Add child under selected task |
 | + Sibling (**S**) | Add sibling after selected task |

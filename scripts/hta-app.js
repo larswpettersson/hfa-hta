@@ -1443,6 +1443,7 @@
       if (!ok) return false;
     }
     applyState(normalized);
+    markSaved();
     showStatus("Analysis opened", "success");
     return true;
   }
@@ -1791,6 +1792,7 @@
     a.download = "hta-tta.json";
     a.click();
     URL.revokeObjectURL(url);
+    markSaved();
     showStatus("Analysis saved", "success");
   }
 
@@ -1870,8 +1872,115 @@
     showStatus("Exported TTA CSV (Excel / SmartArt Outline)", "success");
   }
 
-  function importStateFromFile() {
+  /** Open… asks first when there are unsaved changes (design principles 4.4). */
+  async function importStateFromFile() {
+    if (hasUnsavedChanges() && !(await askAboutUnsaved("Opening a file replaces the analysis."))) return;
     importFileInput?.click();
+  }
+
+  // ---------- Unsaved changes and New (design principles 4.3, 4.4) ----------
+
+  let savedFingerprint = null;
+  const fingerprint = (s = state) =>
+    JSON.stringify({ root: s?.root, ttaRecords: s?.ttaRecords, columns: s?.meta?.columns });
+  /** The analysis as it was when it was last opened, saved or created counts as saved. */
+  function markSaved() {
+    savedFingerprint = fingerprint();
+  }
+  function hasUnsavedChanges() {
+    return !!state && fingerprint() !== savedFingerprint;
+  }
+
+  /** A small modal with the given buttons; resolves to the value of the button pressed ("" on Esc). */
+  function choose({ title, message, buttons }) {
+    return new Promise((resolve) => {
+      const dlg = document.createElement("dialog");
+      dlg.className = "help-dialog confirm-dialog";
+      const h = document.createElement("h2");
+      h.textContent = title;
+      const p = document.createElement("p");
+      p.textContent = message;
+      const row = document.createElement("div");
+      row.className = "confirm-actions";
+      buttons.forEach(([value, label]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "action-btn";
+        b.value = value;
+        b.textContent = label;
+        b.addEventListener("click", () => dlg.close(value));
+        row.appendChild(b);
+      });
+      dlg.append(h, p, row);
+      dlg.addEventListener("keydown", (e) => e.stopPropagation());
+      dlg.addEventListener("close", () => {
+        resolve(dlg.returnValue || "");
+        dlg.remove();
+      });
+      document.body.appendChild(dlg);
+      dlg.showModal();
+      row.lastElementChild?.focus();
+    });
+  }
+
+  /** Unsaved changes: Save (then go on), Don't save (go on) or Cancel. Resolves true to go on. */
+  async function askAboutUnsaved(what) {
+    const answer = await choose({
+      title: "Unsaved changes",
+      message: `The analysis has changes that are not saved. ${what}`,
+      buttons: [["cancel", "Cancel"], ["discard", "Don't save"], ["save", "Save"]],
+    });
+    if (answer === "save") exportStateToFile();
+    return answer === "save" || answer === "discard";
+  }
+
+  /** A minimal, generic analysis that uses the whole structure: goal, sub-tasks, operations, the HEI columns
+      with their descriptions, one filled-in row and empty rows for the other tasks. */
+  function exampleAnalysis() {
+    return {
+      columns: defaultColumns(),
+      root: {
+        id: "1", title: "Reach the overall goal",
+        children: [
+          { id: "1.1", title: "Prepare", children: [
+            { id: "1.1.1", title: "Check the conditions", children: [] },
+            { id: "1.1.2", title: "Set up the equipment", children: [] },
+          ] },
+          { id: "1.2", title: "Carry out the task", children: [] },
+        ],
+      },
+      ttaRecords: [
+        { id: "r1", taskId: "1.1.1", externalErrorMode: "Omission", recovery: "Noticed at the next check (1.2)",
+          consequence: "The task starts under the wrong conditions", humanErrorType: "Lapse", psf: ["Time pressure"],
+          comments: "Example row: replace it with your own analysis." },
+      ],
+    };
+  }
+
+  /** New: replaces the analysis with the example after asking; Ctrl/⌘+Z undoes it. Clears the AI conversation. */
+  async function newAnalysis() {
+    if (hasUnsavedChanges()) {
+      if (!(await askAboutUnsaved("New replaces the analysis with a small example."))) return;
+    } else {
+      const answer = await choose({
+        title: "New analysis",
+        message: "Replace the analysis with a small example that shows the whole structure? Ctrl/⌘+Z undoes it.",
+        buttons: [["cancel", "Cancel"], ["new", "New"]],
+      });
+      if (answer !== "new") return;
+    }
+    const ex = exampleAnalysis();
+    ui.selectedTaskId = null;
+    commit((s) => {
+      s.root = cloneNode(ex.root);
+      s.meta.columns = ex.columns;
+      s.ttaRecords = normalizeTtaRecords(ex.ttaRecords, ex.columns);
+      reassignIdsAndRemapTta(s);
+    });
+    persistColumns();
+    markSaved();
+    window.HTAAssist?.clear?.();
+    showStatus("New analysis: a small example. Ctrl/⌘+Z undoes it.", "success");
   }
 
   // ---------- Actions / keyboard ----------
@@ -1882,6 +1991,7 @@
     exportState: () => exportStateToFile(),
     exportTtaCsv: () => exportTtaCsv(),
     importState: () => importStateFromFile(),
+    newAnalysis: () => newAnalysis(),
     addChild: () => addChildTask(),
     addSibling: () => addSiblingTask(),
     duplicateTask: () => duplicateTask(),
@@ -2340,12 +2450,14 @@
   render(state);
   updateToolbarEnabled();
   resetStateHistory();
+  markSaved();
 
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
     replaceState,
     getSelectedTaskId: () => ui.selectedTaskId,
+    hasUnsavedChanges,
     loadState,
     parseHierarchy,
     treeToIndentedText,
