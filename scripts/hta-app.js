@@ -331,7 +331,7 @@
   function formatImportValidationMessage(errors, warnings) {
     const parts = [];
     if (errors.length) {
-      parts.push(`Cannot load the file (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
+      parts.push(`Cannot open the file (${errors.length} error${errors.length === 1 ? "" : "s"}):\n`);
       errors.forEach((e, i) => {
         parts.push(`${i + 1}. [${e.path}] ${e.message}`);
         if (e.fix) parts.push(`   Fix: ${e.fix}`);
@@ -1433,17 +1433,17 @@
     if (errors.length) {
       const msg = formatImportValidationMessage(errors, warnings);
       window.alert(msg);
-      showStatus("File not loaded", "error");
+      showStatus("File not opened", "error");
       return false;
     }
     if (warnings.length) {
       const ok = window.confirm(
-        `${formatImportValidationMessage([], warnings)}\n\nLoad anyway?`
+        `${formatImportValidationMessage([], warnings)}\n\nOpen anyway?`
       );
       if (!ok) return false;
     }
     applyState(normalized);
-    showStatus("Analysis loaded", "success");
+    showStatus("Analysis opened", "success");
     return true;
   }
 
@@ -1927,8 +1927,8 @@
       const raw = JSON.parse(text);
       loadState(raw);
     } catch (err) {
-      window.alert(`Could not load the file: ${err.message}`);
-      showStatus("File not loaded", "error");
+      window.alert(`Could not open the file: ${err.message}`);
+      showStatus("File not opened", "error");
     }
   });
 
