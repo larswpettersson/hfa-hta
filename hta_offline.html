@@ -319,12 +319,16 @@
 
     /* Penpot Task Selected: drop-shadow blur 2 / spread 4 */
     .task.selected .task-box {
-      box-shadow: 0 0 2px 4px color-mix(in srgb, var(--color-foreground) 20%, transparent);
+      box-shadow: 0 0 2px 4px var(--interaction-shadow); /* shadow.selected */
     }
 
-    .task:hover:not(.selected) .task-box,
-    .task.is-keyboard-hover:not(.selected) .task-box {
+    /* Indication: the mouse and the arrow keys share one hovered shadow (shadow.hovered). */
+    .task.is-keyboard-hover .task-box {
       box-shadow: 4px 4px 4px var(--interaction-shadow);
+    }
+
+    .task.selected.is-keyboard-hover .task-box {
+      box-shadow: 0 0 2px 4px var(--interaction-shadow), 4px 4px 4px var(--interaction-shadow);
     }
 
     .connectors {
@@ -1399,34 +1403,46 @@
       .filter(Boolean);
   }
 
+  /* Indication (design principle 5.3): the task the mouse or the arrow keys point at gets the hovered shadow. It is not the
+     selection: it never changes what is selected. The mouse and the keys take over from each other; only a real mouse
+     movement counts, and the last indicated task is where the next arrow starts. */
+  function setIndicated(id) {
+    ui.keyboardHoverId = id;
+    if (id) ui.indicationOrigin = id;
+    applyKeyboardHoverUI();
+  }
+
+  /** Arrows move the indication to the nearest task in the arrow's direction on the screen (5.2); same row or column first. */
   function navigateTasks(key) {
-    const tasks = getTaskElsInOrder();
-    if (!tasks.length) return;
-    const hoverId =
-      ui.keyboardHoverId ||
-      document.querySelector(".task.is-keyboard-hover")?.dataset.taskId ||
-      null;
-
-    // Hover ↑: jump to parent (e.g. 1.1.2 → 1.1 → root). Stay put on root.
-    if (key === "ArrowUp") {
-      if (!hoverId) {
-        setKeyboardNavTarget(tasks[0], { select: false });
-        return;
-      }
-      const parent = findParentOf(state.root, hoverId);
-      if (!parent) return;
-      const parentEl = taskElements.get(parent.id);
-      if (parentEl) setKeyboardNavTarget(parentEl, { select: false });
-      return;
+    const dir = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[key];
+    if (!dir) return;
+    const items = [];
+    taskElements.forEach((el, id) => {
+      const box = el.querySelector(".task-box") || el;
+      const r = box.getBoundingClientRect();
+      if (r.width || r.height) items.push({ id, el, r });
+    });
+    if (!items.length) return;
+    const startId = ui.keyboardHoverId || ui.indicationOrigin || ui.selectedTaskId;
+    const cur = items.find((it) => it.id === startId);
+    const go = (it) => { setIndicated(it.id); it.el.scrollIntoView({ block: "nearest", inline: "nearest" }); };
+    if (!cur) { go(items.slice().sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left)[0]); return; }
+    // the first arrow after the mouse left the tasks shows the indication on the remembered task before it moves on
+    if (!ui.keyboardHoverId) { go(cur); return; }
+    const [dx, dy] = dir;
+    const cx = cur.r.left + cur.r.width / 2, cy = cur.r.top + cur.r.height / 2;
+    let best = null;
+    for (const it of items) {
+      if (it === cur) continue;
+      const mx = it.r.left + it.r.width / 2 - cx, my = it.r.top + it.r.height / 2 - cy;
+      const along = dx ? mx * dx : my * dy, across = dx ? Math.abs(my) : Math.abs(mx);
+      if (along <= 1) continue;
+      const overlap = dx ? Math.min(it.r.bottom, cur.r.bottom) - Math.max(it.r.top, cur.r.top) > 0
+        : Math.min(it.r.right, cur.r.right) - Math.max(it.r.left, cur.r.left) > 0;
+      const score = [overlap ? 0 : 1, along + 2 * across];
+      if (!best || score[0] < best.score[0] || (score[0] === best.score[0] && score[1] < best.score[1])) best = { it, score };
     }
-
-    // Hover ↓: next task in tree order (into first child, then siblings, etc.)
-    if (key === "ArrowDown") {
-      const current = hoverId ? taskElements.get(hoverId) : null;
-      let index = current ? tasks.indexOf(current) : -1;
-      index = index < 0 ? 0 : Math.min(tasks.length - 1, index + 1);
-      setKeyboardNavTarget(tasks[index], { select: false });
-    }
+    if (best) go(best.it);
   }
 
   /** Hover: ←→ move keyboard hover among siblings (same level). */
@@ -2800,6 +2816,17 @@
     }
   });
 
+  // The mouse sets the indication on the task under it (a real movement only: a scroll under a still pointer does not).
+  let lastPointer = [NaN, NaN];
+  hierarchyEl?.addEventListener("mousemove", (e) => {
+    if (e.clientX === lastPointer[0] && e.clientY === lastPointer[1]) return;
+    lastPointer = [e.clientX, e.clientY];
+    if (isPanning || isSplitResizing) return;
+    const id = e.target.closest(".task")?.dataset.taskId || null;
+    if (id !== ui.keyboardHoverId) setIndicated(id);
+  });
+  hierarchyEl?.addEventListener("mouseleave", () => { if (ui.keyboardHoverId) setIndicated(null); });
+
   hierarchyEl?.addEventListener("mousedown", (e) => {
     if (isModClick(e) && e.target.closest(".desc-text")) {
       e.preventDefault();
@@ -3116,27 +3143,20 @@
       return;
     }
 
-    if (e.key === "Enter" && !e.shiftKey) {
-      if (handleEnterOnComponent(e)) return;
+    if ((e.key === "Enter" && !e.shiftKey) || (e.key === "F2" && !e.ctrlKey && !e.metaKey)) {
+      if (handleEnterOnComponent(e.key === "F2" ? { key: "Enter", shiftKey: false, preventDefault: () => e.preventDefault() } : e)) return;
     }
 
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-      if (ui.selectedTaskId) {
-        if (handleSelectedArrow(e.key)) e.preventDefault();
+    if (e.key in { ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1 }) {
+      if (active === splitResizer) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return; // Ctrl/⌘+arrow is not used (5.4)
+      if (e.altKey) { // Alt/Option+arrow moves the selected task (5.6); the browser's Alt+←/→ history is stopped
+        if (ui.selectedTaskId && handleSelectedArrow(e.key)) e.preventDefault();
+        else e.preventDefault();
         return;
       }
       e.preventDefault();
       navigateTasks(e.key);
-      return;
-    }
-
-    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      if (active === splitResizer) return;
-      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-      if (handleHorizontalArrow(e.key)) {
-        e.preventDefault();
-      }
       return;
     }
 

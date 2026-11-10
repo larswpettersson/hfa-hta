@@ -319,12 +319,16 @@
 
     /* Penpot Task Selected: drop-shadow blur 2 / spread 4 */
     .task.selected .task-box {
-      box-shadow: 0 0 2px 4px color-mix(in srgb, var(--color-foreground) 20%, transparent);
+      box-shadow: 0 0 2px 4px var(--interaction-shadow); /* shadow.selected */
     }
 
-    .task:hover:not(.selected) .task-box,
-    .task.is-keyboard-hover:not(.selected) .task-box {
+    /* Indication: the mouse and the arrow keys share one hovered shadow (shadow.hovered). */
+    .task.is-keyboard-hover .task-box {
       box-shadow: 4px 4px 4px var(--interaction-shadow);
+    }
+
+    .task.selected.is-keyboard-hover .task-box {
+      box-shadow: 0 0 2px 4px var(--interaction-shadow), 4px 4px 4px var(--interaction-shadow);
     }
 
     .connectors {
