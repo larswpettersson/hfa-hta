@@ -102,10 +102,12 @@ The columns belong to the analysis and are saved in `meta.columns` (see [design 
 | **Space** + drag | Pan the HTA canvas (hand tool) |
 | **⌘Z** / **Ctrl+Z** | Undo |
 | **⌘⇧Z** / **Ctrl+Shift+Z** (or **Ctrl+Y**) | Redo |
-| **↑** | Hover: move to parent (e.g. 1.1.2 → 1.1 → root). Selected: outdent (move up a level) |
-| **↓** | Hover: next task in tree order. Selected: indent under previous sibling (move down a level) |
-| **←** | Hover: previous sibling. Selected: move earlier among siblings |
-| **→** | Hover: next sibling. Selected: move later among siblings |
+| **← ↑ → ↓** | Move the indication (hovered shadow) to the nearest task in that direction on the screen. Arrows never select or move |
+| **Ctrl/⌘ + Enter** | Select the indicated task |
+| **Enter** / **F2** | Edit the indicated task's text |
+| **Alt/Option + ↑** | Selected task: outdent (move up a level) |
+| **Alt/Option + ↓** | Selected task: indent under the previous sibling (move down a level) |
+| **Alt/Option + ←** / **→** | Selected task: move earlier / later among siblings |
 | **C** / **S** / **D** | Child / Sibling / Duplicate |
 | **A** | Open / close the AI analysis panel |
 | **Delete** / **Backspace** | Delete selected task (not root) |
