@@ -60,8 +60,9 @@
 
     .header {
       background: var(--color-background-elevated);
-      padding: 12px 16px;
+      padding: 8px 16px;
       border-radius: var(--card-radius);
+      border: 1px solid var(--color-foreground-muted);
       margin-bottom: 16px;
       display: flex;
       justify-content: flex-start;
@@ -81,20 +82,25 @@
       gap: 8px;
       align-items: center;
       flex-wrap: wrap;
-      width: 100%;
+      flex: 1;
     }
+    .app-name { font-size: 16px; display: flex; align-items: center; gap: 8px; margin-right: 8px; }
+    .app-name .mark { width: 10px; height: 10px; border-radius: 2px; background: var(--color-brand-primary); }
+    .toolbar .theme-btn { margin-left: auto; }
+    .toolbar .ai-toggle { margin-left: 0; }
 
     .action-btn {
       display: inline-flex;
       align-items: center;
       gap: 2px;
-      padding: 8px 10px;
+      min-height: 28px;
+      padding: 0 10px;
       font: inherit;
       font-size: 14px;
       color: var(--color-foreground);
       background: var(--color-background-base);
       border: 1px solid var(--color-foreground);
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
     }
 
@@ -153,7 +159,8 @@
       max-width: calc(100% - 240px);
       overflow: hidden;
       background: var(--color-background-elevated);
-      border-radius: var(--card-radius) 0 0 var(--card-radius);
+      border: 1px solid var(--color-foreground-muted);
+      border-radius: var(--card-radius);
       max-height: calc(100vh - 140px);
       display: flex;
       flex-direction: column;
@@ -164,13 +171,14 @@
     .hta-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      justify-content: flex-start;
+      gap: 8px;
       flex-wrap: wrap;
       flex-shrink: 0;
       padding-bottom: 0;
     }
 
+    .hta-header h2, .tta-header h2 { margin-right: 8px; }
     .hta-header h2 {
       font-size: 16px;
       font-weight: 600;
@@ -213,10 +221,10 @@
     }
 
     .split-resizer {
-      flex: 0 0 8px;
-      width: 8px;
-      margin: 0 4px;
-      border-radius: 4px;
+      flex: 0 0 16px;
+      width: 16px;
+      margin: 0;
+      border-radius: 0;
       background: transparent;
       cursor: col-resize;
       position: relative;
@@ -227,12 +235,12 @@
     .split-resizer::before {
       content: "";
       position: absolute;
-      top: 12px;
-      bottom: 12px;
-      left: 2px;
-      right: 2px;
+      top: 28px;
+      bottom: 28px;
+      left: 6px;
+      right: 6px;
       border-radius: 2px;
-      background: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+      background: var(--color-accent);
     }
 
     .split-resizer:hover::before,
@@ -365,7 +373,8 @@
       flex: 1 1 0;
       min-width: 220px;
       background: var(--color-background-elevated);
-      border-radius: 0 var(--card-radius) var(--card-radius) 0;
+      border: 1px solid var(--color-foreground-muted);
+      border-radius: var(--card-radius);
       padding: 16px;
       max-height: calc(100vh - 140px);
       display: flex;
@@ -377,8 +386,8 @@
     .tta-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      justify-content: flex-start;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -600,29 +609,17 @@
 <body data-theme="light">
   <div class="container">
     <div class="header">
+      <h1 class="app-name"><span class="mark" aria-hidden="true"></span>HFA HTA</h1>
       <div class="toolbar">
-        <button type="button" class="action-btn" data-action="setThemeLight" title="Light mode">
-          Light
-        </button>
-        <button type="button" class="action-btn" data-action="setThemeDark" title="Dark mode">
-          Dark
-        </button>
         <button type="button" class="action-btn" data-action="newAnalysis" title="Replace the analysis with a small example that shows the whole structure">New</button>
         <button type="button" class="action-btn" data-action="importState" title="Open an analysis (JSON file)">Open…</button>
         <button type="button" class="action-btn" data-action="exportState" title="Save the analysis (HTA + TTA) as a JSON file">Save</button>
-        <button type="button" class="action-btn" data-action="addChild" data-shortcut="c" title="Add child (C)">
-          <span class="btn-label">Add <span class="ul">C</span>hild</span>
-        </button>
-        <button type="button" class="action-btn" data-action="addSibling" data-shortcut="s" title="Add sibling (S)">
-          <span class="btn-label">Add <span class="ul">S</span>ibling</span>
-        </button>
-        <button type="button" class="action-btn" data-action="duplicateTask" data-shortcut="d" title="Duplicate (D)">
-          <span class="btn-label"><span class="ul">D</span>uplicate</span>
-        </button>
+        <button type="button" class="action-btn" data-action="undo" title="Undo the last change (Ctrl/⌘+Z)">Undo</button>
         <input type="file" id="import-state-file" accept=".json,application/json" hidden />
         <button type="button" class="action-btn" data-action="toggleHelp" data-shortcut="?" title="Show shortcuts and abbreviations (?)" aria-label="Show shortcuts and abbreviations" aria-haspopup="dialog">
           ?
         </button>
+        <button type="button" class="action-btn theme-btn" data-action="toggleTheme" title="Toggle light/dark theme">Theme</button>
       </div>
     </div>
 
@@ -630,6 +627,15 @@
       <div class="hierarchy-container" id="htaPanel">
         <div class="hta-header">
           <h2>HTA</h2>
+          <button type="button" class="action-btn" data-action="addChild" data-shortcut="c" title="Add child" aria-keyshortcuts="C">
+            <span class="btn-label">Add <span class="ul">C</span>hild</span>
+          </button>
+          <button type="button" class="action-btn" data-action="addSibling" data-shortcut="s" title="Add sibling" aria-keyshortcuts="S">
+            <span class="btn-label">Add <span class="ul">S</span>ibling</span>
+          </button>
+          <button type="button" class="action-btn" data-action="duplicateTask" data-shortcut="d" title="Duplicate" aria-keyshortcuts="D">
+            <span class="btn-label"><span class="ul">D</span>uplicate</span>
+          </button>
         </div>
         <div class="hta-viewport" id="htaViewport">
           <div class="hierarchy" id="hierarchy" aria-label="HTA hierarchy">

@@ -1988,6 +1988,8 @@
   const actions = {
     setThemeLight: () => setTheme("light"),
     setThemeDark: () => setTheme("dark"),
+    toggleTheme: () => setTheme(document.body.dataset.theme === "dark" ? "light" : "dark"),
+    undo: () => undoState(),
     exportState: () => exportStateToFile(),
     exportTtaCsv: () => exportTtaCsv(),
     importState: () => importStateFromFile(),
