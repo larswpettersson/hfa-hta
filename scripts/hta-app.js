@@ -534,6 +534,7 @@
   function setTheme(theme) {
     const next = theme === "dark" ? "dark" : "light";
     document.body.dataset.theme = next;
+    document.querySelectorAll(".theme-toggle").forEach((b) => b.setAttribute("aria-checked", String(next === "dark")));
     if (state) state.meta.theme = next;
   }
 

@@ -261,8 +261,7 @@ For a complete analysis give {"root": …, "ttaRecords": […]} instead, with th
   window.HTAAssist = HFAAssist.mount({
     id: "hta",
     title: "HTA analysis",
-    toolbar: document.querySelector(".header .toolbar"),
-    buttonClass: "action-btn",
+    content: document.querySelector(".main-content"),
     systemPrompt: SYSTEM_PROMPT,
     schemaPrompt: columnPrompt,
     contextLabel: "Current HTA and TTA (JSON)",
