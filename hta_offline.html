@@ -1648,10 +1648,13 @@
     taskMain.appendChild(taskBox);
     taskDiv.appendChild(taskMain);
 
+    // A click anywhere on a task selects the task, the text included (as in STPA); Enter edits the text.
     taskDiv.addEventListener("click", (e) => {
-      if (e.target.closest(".desc-text")) return;
+      if (e.target.closest(".desc-text") === document.activeElement) return; // a click in the text being edited
+      const editing = document.activeElement;
+      if (editing?.isContentEditable && !editing.contains(e.target)) editing.blur(); // a click elsewhere applies the edit
       e.stopPropagation();
-      selectTask(task.id);
+      selectTask(task.id, { skipTextFocus: true });
     });
 
     taskElements.set(task.id, taskDiv);
@@ -2841,10 +2844,10 @@
   });
   hierarchyEl?.addEventListener("mouseleave", () => { if (ui.keyboardHoverId) setIndicated(null); });
 
+  // The mouse does not put a caret in a task's text unless it is being edited; Enter does that.
   hierarchyEl?.addEventListener("mousedown", (e) => {
-    if (isModClick(e) && e.target.closest(".desc-text")) {
-      e.preventDefault();
-    }
+    const field = e.target.closest(".desc-text");
+    if (field && field !== document.activeElement) e.preventDefault();
   });
 
   function isTypingTarget(el) {
@@ -3164,9 +3167,11 @@
     if (e.key in { ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1 }) {
       if (active === splitResizer) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return; // Ctrl/⌘+arrow is not used (5.4)
-      if (e.altKey) { // Alt/Option+arrow moves the selected task (5.6); the browser's Alt+←/→ history is stopped
-        if (ui.selectedTaskId && handleSelectedArrow(e.key)) e.preventDefault();
-        else e.preventDefault();
+      // A selected task moves with the arrow keys, in the directions it can move (Alt/Option+arrow does the same);
+      // the browser's Alt+←/→ history is stopped.
+      if (e.altKey || ui.selectedTaskId) {
+        e.preventDefault();
+        if (ui.selectedTaskId) handleSelectedArrow(e.key);
         return;
       }
       e.preventDefault();
