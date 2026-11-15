@@ -570,34 +570,14 @@
     return ui.selectedTaskId === taskEl.dataset.taskId;
   }
 
+  // The reason for a blur (Enter, Esc, Tab) belongs to that one blur: it is cleared whether or not a session was open,
+  // so that it cannot decide how the next, unrelated blur is treated.
   function handleEditBlur(el) {
-    if (!editSession || editSession.el !== el) return;
-    if (blurNavigation === "cancel" || blurNavigation === "apply") {
-      blurNavigation = null;
-      return;
-    }
-
-    if (blurNavigation === "tab" && isEditContextSelected(el)) {
-      const related = document.activeElement;
-      const leaving = el.closest(".task");
-      const entering = related?.closest?.(".task");
-      const tabWithinSame =
-        leaving && entering && leaving.dataset.taskId === entering.dataset.taskId;
-
-      if (tabWithinSame) {
-        const value = readEditableText(el);
-        el.dataset.full = value;
-        editSession.setValue(value);
-        editSession = null;
-      } else {
-        cancelEditSession();
-      }
-      blurNavigation = null;
-      return;
-    }
-
-    applyEditSession();
+    const reason = blurNavigation;
     blurNavigation = null;
+    if (!editSession || editSession.el !== el) return;
+    if (reason === "cancel" || reason === "apply") return;
+    applyEditSession(); // a click elsewhere and Tab both confirm the edit; nothing is lost silently
   }
 
   function beginFieldEdit(taskEl, role = "description") {
@@ -2080,9 +2060,31 @@
 
   // The mouse does not put a caret in a task's text unless it is being edited; Enter does that.
   hierarchyEl?.addEventListener("mousedown", (e) => {
+    const had = document.activeElement;
+    const taskEl = e.target.closest(".task");
+    const editing = had?.isContentEditable && hierarchyEl.contains(had) ? had : null;
+    if (editing && taskEl && !editing.contains(e.target)) {
+      // A click on another task while a text is edited: confirm the edit and select the clicked task now. The redraw that follows
+      // the edit replaces the task elements, so a later click would find its target gone.
+      e.preventDefault();
+      const id = taskEl.dataset.taskId;
+      editing.blur();
+      selectTask(id, { skipTextFocus: true });
+      swallowClickUntil = performance.now() + 500;
+      return;
+    }
     const field = e.target.closest(".desc-text");
-    if (field && field !== document.activeElement) e.preventDefault();
+    if (field && field !== had) {
+      e.preventDefault();
+      // Focus leaves whatever had it (a draft in the AI panel stays but loses the keys), so that Enter after the click
+      // means "edit this task" and not "send the AI question".
+      if (had && had !== document.body && had.blur) had.blur();
+    }
   });
+  let swallowClickUntil = 0;
+  hierarchyEl?.addEventListener("click", (e) => {
+    if (performance.now() < swallowClickUntil) { swallowClickUntil = 0; e.stopPropagation(); e.preventDefault(); }
+  }, true);
 
   function isTypingTarget(el) {
     if (!el) return false;
@@ -2339,13 +2341,15 @@
     const mod = e.metaKey || e.ctrlKey;
 
     // Undo / redo (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z, Cmd/Ctrl+Y)
-    if (mod && !e.altKey && e.key.toLowerCase() === "z") {
+    // While a task's text is edited, Ctrl/⌘+Z is the field's own undo; the app's history would replace the tasks under the field.
+    const editingText = !!active?.isContentEditable;
+    if (mod && !e.altKey && !editingText && e.key.toLowerCase() === "z") {
       e.preventDefault();
       if (e.shiftKey) redo();
       else undo();
       return;
     }
-    if (mod && !e.altKey && e.key.toLowerCase() === "y") {
+    if (mod && !e.altKey && !editingText && e.key.toLowerCase() === "y") {
       e.preventDefault();
       redo();
       return;
@@ -2358,6 +2362,7 @@
         blurNavigation = "cancel";
         cancelEditSession();
         active.blur();
+        blurNavigation = null;
         if (taskId) {
           const el = taskElements.get(taskId);
           if (el) setKeyboardNavTarget(el, { select: false });
@@ -2373,6 +2378,7 @@
         blurNavigation = "apply";
         applyEditSession();
         active.blur();
+        blurNavigation = null;
         if (e.metaKey || e.ctrlKey) {
           if (taskId) selectTask(taskId, { skipTextFocus: true });
         } else {
