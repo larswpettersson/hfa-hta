@@ -1,4 +1,11 @@
 {
+  "$comment": [
+    "HFA HTA + TTA analysis, version 1. This $comment is ignored when the file is opened.",
+    "root is the top task: { id, title, children: [tasks] }. title is a non-empty text; there is no length limit. Ids are given by the tool (1, 1.1, 1.2, 1.2.1 …) and are renumbered from the tree when the file is opened.",
+    "ttaRecords are the TTA rows: { id, taskId, <one field per column> }. taskId is the id of the task the row analyses, in the tool's numbering, so that it still matches after opening. A task without a row gets an empty one when the file is opened.",
+    "meta.columns describe the TTA columns: { id, label, visible, order, type, description, options }. type \"text\" is a text, \"list\" is an array of texts, and \"select\" is one of the column's options. The column taskStep is the link to the task and has no field in the rows. A column's description says what to write in it.",
+    "The default select column externalErrorMode takes one of: \"Omission\", \"Action too much\", \"Action too little\", \"Action too late\", \"Action too early\", \"Mis-ordering\", \"Wrong action\"."
+  ],
   "version": 1,
   "meta": {
     "theme": "light"

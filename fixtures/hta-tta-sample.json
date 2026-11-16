@@ -1,15 +1,57 @@
 {
+  "$comment": [
+    "HFA HTA + TTA analysis, version 1. This $comment is ignored when the file is opened.",
+    "root is the top task: { id, title, children: [tasks] }. title is a non-empty text; there is no length limit. Ids are given by the tool (1, 1.1, 1.2, 1.2.1 …) and are renumbered from the tree when the file is opened.",
+    "ttaRecords are the TTA rows: { id, taskId, <one field per column> }. taskId is the id of the task the row analyses, in the tool's numbering, so that it still matches after opening. A task without a row gets an empty one when the file is opened.",
+    "meta.columns describe the TTA columns: { id, label, visible, order, type, description, options }. type \"text\" is a text, \"list\" is an array of texts, and \"select\" is one of the column's options. The column taskStep is the link to the task and has no field in the rows. A column's description says what to write in it.",
+    "The default select column externalErrorMode takes one of: \"Omission\", \"Action too much\", \"Action too little\", \"Action too late\", \"Action too early\", \"Mis-ordering\", \"Wrong action\"."
+  ],
   "version": 2,
   "meta": {
     "theme": "light",
     "columns": [
-      { "id": "taskStep", "label": "Task Step", "visible": true, "order": 0 },
-      { "id": "externalErrorMode", "label": "External Error Mode", "visible": true, "order": 1 },
-      { "id": "recovery", "label": "Recovery", "visible": true, "order": 2 },
-      { "id": "consequence", "label": "Consequence", "visible": true, "order": 3 },
-      { "id": "humanErrorType", "label": "Human Error Type", "visible": true, "order": 4 },
-      { "id": "psf", "label": "PSFs", "visible": true, "order": 5 },
-      { "id": "comments", "label": "Comments", "visible": true, "order": 6 }
+      {
+        "id": "taskStep",
+        "label": "Task Step",
+        "visible": true,
+        "order": 0
+      },
+      {
+        "id": "externalErrorMode",
+        "label": "External Error Mode",
+        "visible": true,
+        "order": 1
+      },
+      {
+        "id": "recovery",
+        "label": "Recovery",
+        "visible": true,
+        "order": 2
+      },
+      {
+        "id": "consequence",
+        "label": "Consequence",
+        "visible": true,
+        "order": 3
+      },
+      {
+        "id": "humanErrorType",
+        "label": "Human Error Type",
+        "visible": true,
+        "order": 4
+      },
+      {
+        "id": "psf",
+        "label": "PSFs",
+        "visible": true,
+        "order": 5
+      },
+      {
+        "id": "comments",
+        "label": "Comments",
+        "visible": true,
+        "order": 6
+      }
     ]
   },
   "root": {
@@ -39,7 +81,9 @@
       "recovery": "Auto-cutout",
       "consequence": "Overspeed",
       "humanErrorType": "Skill-based slip",
-      "psf": ["Interface"],
+      "psf": [
+        "Interface"
+      ],
       "comments": ""
     },
     {
@@ -49,7 +93,9 @@
       "recovery": "Driver prompt",
       "consequence": "Late arrival",
       "humanErrorType": "Rule-based mistake",
-      "psf": ["Procedures"],
+      "psf": [
+        "Procedures"
+      ],
       "comments": ""
     },
     {
@@ -59,7 +105,9 @@
       "recovery": "Signal alert",
       "consequence": "Signal passed",
       "humanErrorType": "Lapse",
-      "psf": ["Environment"],
+      "psf": [
+        "Environment"
+      ],
       "comments": ""
     }
   ]

@@ -2543,8 +2543,18 @@
 
   // ---------- Import / export ----------
 
+  /* "$comment" at the top of a saved file (design principles 4.15): the format and its limits, for a person or an AI that
+     writes the file without knowing the tool. It is ignored when the file is opened. */
+  const FORMAT_NOTE = [
+    "HFA HTA + TTA analysis, version 1. This $comment is ignored when the file is opened.",
+    "root is the top task: { id, title, children: [tasks] }. title is a non-empty text; there is no length limit. Ids are given by the tool (1, 1.1, 1.2, 1.2.1 …) and are renumbered from the tree when the file is opened.",
+    "ttaRecords are the TTA rows: { id, taskId, <one field per column> }. taskId is the id of the task the row analyses, in the tool's numbering, so that it still matches after opening. A task without a row gets an empty one when the file is opened.",
+    "meta.columns describe the TTA columns: { id, label, visible, order, type, description, options }. type \"text\" is a text, \"list\" is an array of texts, and \"select\" is one of the column's options. The column taskStep is the link to the task and has no field in the rows. A column's description says what to write in it.",
+    `The default select column externalErrorMode takes one of: ${EXTERNAL_ERROR_MODES.map((m) => `"${m}"`).join(", ")}.`,
+  ];
+
   function exportStateToFile() {
-    const payload = serializeState();
+    const payload = { $comment: FORMAT_NOTE, ...serializeState() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
@@ -2826,6 +2836,7 @@
 
   // The mouse does not put a caret in a task's text unless it is being edited; Enter does that.
   hierarchyEl?.addEventListener("mousedown", (e) => {
+    swallowNextClick = false;
     const had = document.activeElement;
     const taskEl = e.target.closest(".task");
     const editing = had?.isContentEditable && hierarchyEl.contains(had) ? had : null;
@@ -2836,7 +2847,7 @@
       const id = taskEl.dataset.taskId;
       editing.blur();
       selectTask(id, { skipTextFocus: true });
-      swallowClickUntil = performance.now() + 500;
+      swallowNextClick = true; // only the click of this press; the next mousedown clears it
       return;
     }
     const field = e.target.closest(".desc-text");
@@ -2847,9 +2858,9 @@
       if (had && had !== document.body && had.blur) had.blur();
     }
   });
-  let swallowClickUntil = 0;
+  let swallowNextClick = false;
   hierarchyEl?.addEventListener("click", (e) => {
-    if (performance.now() < swallowClickUntil) { swallowClickUntil = 0; e.stopPropagation(); e.preventDefault(); }
+    if (swallowNextClick) { swallowNextClick = false; e.stopPropagation(); e.preventDefault(); }
   }, true);
 
   function isTypingTarget(el) {
@@ -3251,6 +3262,7 @@
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
+    formatNote: FORMAT_NOTE, // the "$comment" written at the top of a saved file
     replaceState,
     getSelectedTaskId: () => ui.selectedTaskId,
     hasUnsavedChanges,
