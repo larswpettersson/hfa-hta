@@ -570,34 +570,14 @@
     return ui.selectedTaskId === taskEl.dataset.taskId;
   }
 
+  // The reason for a blur (Enter, Esc, Tab) belongs to that one blur: it is cleared whether or not a session was open,
+  // so that it cannot decide how the next, unrelated blur is treated.
   function handleEditBlur(el) {
-    if (!editSession || editSession.el !== el) return;
-    if (blurNavigation === "cancel" || blurNavigation === "apply") {
-      blurNavigation = null;
-      return;
-    }
-
-    if (blurNavigation === "tab" && isEditContextSelected(el)) {
-      const related = document.activeElement;
-      const leaving = el.closest(".task");
-      const entering = related?.closest?.(".task");
-      const tabWithinSame =
-        leaving && entering && leaving.dataset.taskId === entering.dataset.taskId;
-
-      if (tabWithinSame) {
-        const value = readEditableText(el);
-        el.dataset.full = value;
-        editSession.setValue(value);
-        editSession = null;
-      } else {
-        cancelEditSession();
-      }
-      blurNavigation = null;
-      return;
-    }
-
-    applyEditSession();
+    const reason = blurNavigation;
     blurNavigation = null;
+    if (!editSession || editSession.el !== el) return;
+    if (reason === "cancel" || reason === "apply") return;
+    applyEditSession(); // a click elsewhere and Tab both confirm the edit; nothing is lost silently
   }
 
   function beginFieldEdit(taskEl, role = "description") {
@@ -882,10 +862,13 @@
     taskMain.appendChild(taskBox);
     taskDiv.appendChild(taskMain);
 
+    // A click anywhere on a task selects the task, the text included (as in STPA); Enter edits the text.
     taskDiv.addEventListener("click", (e) => {
-      if (e.target.closest(".desc-text")) return;
+      if (e.target.closest(".desc-text") === document.activeElement) return; // a click in the text being edited
+      const editing = document.activeElement;
+      if (editing?.isContentEditable && !editing.contains(e.target)) editing.blur(); // a click elsewhere applies the edit
       e.stopPropagation();
-      selectTask(task.id);
+      selectTask(task.id, { skipTextFocus: true });
     });
 
     taskElements.set(task.id, taskDiv);
@@ -1794,8 +1777,18 @@
 
   // ---------- Import / export ----------
 
+  /* "$comment" at the top of a saved file (design principles 4.15): the format and its limits, for a person or an AI that
+     writes the file without knowing the tool. It is ignored when the file is opened. */
+  const FORMAT_NOTE = [
+    "HFA HTA + TTA analysis, version 1. This $comment is ignored when the file is opened.",
+    "root is the top task: { id, title, children: [tasks] }. title is a non-empty text; there is no length limit. Ids are given by the tool (1, 1.1, 1.2, 1.2.1 …) and are renumbered from the tree when the file is opened.",
+    "ttaRecords are the TTA rows: { id, taskId, <one field per column> }. taskId is the id of the task the row analyses, in the tool's numbering, so that it still matches after opening. A task without a row gets an empty one when the file is opened.",
+    "meta.columns describe the TTA columns: { id, label, visible, order, type, description, options }. type \"text\" is a text, \"list\" is an array of texts, and \"select\" is one of the column's options. The column taskStep is the link to the task and has no field in the rows. A column's description says what to write in it.",
+    `The default select column externalErrorMode takes one of: ${EXTERNAL_ERROR_MODES.map((m) => `"${m}"`).join(", ")}.`,
+  ];
+
   function exportStateToFile() {
-    const payload = serializeState();
+    const payload = { $comment: FORMAT_NOTE, ...serializeState() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
@@ -2075,11 +2068,34 @@
   });
   hierarchyEl?.addEventListener("mouseleave", () => { if (ui.keyboardHoverId) setIndicated(null); });
 
+  // The mouse does not put a caret in a task's text unless it is being edited; Enter does that.
   hierarchyEl?.addEventListener("mousedown", (e) => {
-    if (isModClick(e) && e.target.closest(".desc-text")) {
+    swallowNextClick = false;
+    const had = document.activeElement;
+    const taskEl = e.target.closest(".task");
+    const editing = had?.isContentEditable && hierarchyEl.contains(had) ? had : null;
+    if (editing && taskEl && !editing.contains(e.target)) {
+      // A click on another task while a text is edited: confirm the edit and select the clicked task now. The redraw that follows
+      // the edit replaces the task elements, so a later click would find its target gone.
       e.preventDefault();
+      const id = taskEl.dataset.taskId;
+      editing.blur();
+      selectTask(id, { skipTextFocus: true });
+      swallowNextClick = true; // only the click of this press; the next mousedown clears it
+      return;
+    }
+    const field = e.target.closest(".desc-text");
+    if (field && field !== had) {
+      e.preventDefault();
+      // Focus leaves whatever had it (a draft in the AI panel stays but loses the keys), so that Enter after the click
+      // means "edit this task" and not "send the AI question".
+      if (had && had !== document.body && had.blur) had.blur();
     }
   });
+  let swallowNextClick = false;
+  hierarchyEl?.addEventListener("click", (e) => {
+    if (swallowNextClick) { swallowNextClick = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
 
   function isTypingTarget(el) {
     if (!el) return false;
@@ -2336,13 +2352,15 @@
     const mod = e.metaKey || e.ctrlKey;
 
     // Undo / redo (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z, Cmd/Ctrl+Y)
-    if (mod && !e.altKey && e.key.toLowerCase() === "z") {
+    // While a task's text is edited, Ctrl/⌘+Z is the field's own undo; the app's history would replace the tasks under the field.
+    const editingText = !!active?.isContentEditable;
+    if (mod && !e.altKey && !editingText && e.key.toLowerCase() === "z") {
       e.preventDefault();
       if (e.shiftKey) redo();
       else undo();
       return;
     }
-    if (mod && !e.altKey && e.key.toLowerCase() === "y") {
+    if (mod && !e.altKey && !editingText && e.key.toLowerCase() === "y") {
       e.preventDefault();
       redo();
       return;
@@ -2355,6 +2373,7 @@
         blurNavigation = "cancel";
         cancelEditSession();
         active.blur();
+        blurNavigation = null;
         if (taskId) {
           const el = taskElements.get(taskId);
           if (el) setKeyboardNavTarget(el, { select: false });
@@ -2370,6 +2389,7 @@
         blurNavigation = "apply";
         applyEditSession();
         active.blur();
+        blurNavigation = null;
         if (e.metaKey || e.ctrlKey) {
           if (taskId) selectTask(taskId, { skipTextFocus: true });
         } else {
@@ -2398,9 +2418,11 @@
     if (e.key in { ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1 }) {
       if (active === splitResizer) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey) return; // Ctrl/⌘+arrow is not used (5.4)
-      if (e.altKey) { // Alt/Option+arrow moves the selected task (5.6); the browser's Alt+←/→ history is stopped
-        if (ui.selectedTaskId && handleSelectedArrow(e.key)) e.preventDefault();
-        else e.preventDefault();
+      // A selected task moves with the arrow keys, in the directions it can move (Alt/Option+arrow does the same);
+      // the browser's Alt+←/→ history is stopped.
+      if (e.altKey || ui.selectedTaskId) {
+        e.preventDefault();
+        if (ui.selectedTaskId) handleSelectedArrow(e.key);
         return;
       }
       e.preventDefault();
@@ -2474,6 +2496,7 @@
   // Expose for smoke tests / debugging
   window.HTAEditor = {
     getState: () => serializeState(),
+    formatNote: FORMAT_NOTE, // the "$comment" written at the top of a saved file
     replaceState,
     getSelectedTaskId: () => ui.selectedTaskId,
     hasUnsavedChanges,
